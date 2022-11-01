@@ -1,0 +1,43 @@
+# Various IDEs and Editors
+.vscode/
+.idea/
+**/*~
+
+# Mac OSX temporary files
+.DS_Store
+**/.DS_Store
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dfx temporary files
+.dfx/
+.dfx-bkcf/
+
+# Vessel
+.vessel
+
+# frontend code
+node_modules/
+
+# ESLint
+.eslintcache
+
+# Next.js
+.next/
+out/
+.env.local
+
+# testing
+/coverage
+/test-results
+Test*.wasm
+
+
+# Local Script
+.localscripts/
+
+# Firebase
+.firebase

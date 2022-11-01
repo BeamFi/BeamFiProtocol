@@ -1,0 +1,45 @@
+{
+  "canisters": {
+    "beamescrow": {
+      "main": "backend/service/BeamEscrow.mo",
+      "dependencies": ["ledger"]
+    },
+    "monitoragent": {
+      "main": "backend/service/MonitorAgent.mo",
+      "dependencies": ["beamescrow", "ledger"]
+    },
+    "beam": {
+      "main": "backend/service/Beam.mo",
+      "dependencies": ["ledger", "beamescrow"]
+    },
+    "beamout": {
+      "main": "backend/service/BeamOut.mo"
+    },
+    "ledger": {
+      "type": "custom",
+      "wasm": "local/ledger/ledger.wasm",
+      "candid": "backend/remote/ledger/ledger.public.did",
+      "remote": {
+        "candid": "backend/remote/ledger/ledger.public.did",
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      },
+      "build": []
+    }
+  },
+  "defaults": {
+    "bitcoin": {
+      "enabled": true,
+      "nodes": ["127.0.0.1:18444"],
+      "log_level": "info"
+    },
+    "replica": {
+      "subnet_type": "system"
+    },
+    "build": { "packtool": "vessel sources" }
+  },
+  "dfx": "0.11.2",
+  "networks": { "local": { "bind": "127.0.0.1:8000", "type": "ephemeral" } },
+  "version": 1
+}

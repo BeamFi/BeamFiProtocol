@@ -1,0 +1,15 @@
+{
+  "tabWidth": 2,
+  "trailingComma": "none",
+  "semi": false,
+  "arrowParens": "avoid",
+  "bracketSpacing": true,
+  "overrides": [
+    {
+      "files": "*.mo",
+      "options": {
+        "printWidth": 120
+      }
+    }
+  ]
+}

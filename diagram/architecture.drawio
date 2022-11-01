@@ -1,0 +1,186 @@
+<mxfile host="65bd71144e">
+    <diagram id="KVRml0NFvvnyDox_iJLR" name="Beam">
+        <mxGraphModel dx="842" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="QkdlXIdf6SLyogeyPklL-0"/>
+                <mxCell id="QkdlXIdf6SLyogeyPklL-1" parent="QkdlXIdf6SLyogeyPklL-0"/>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-0" value="&lt;h1&gt;Beam Architecture&lt;/h1&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="70" y="20" width="320" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-1" value="Beam Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="412" y="380" width="90" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-11" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="QkdlXIdf6SLyogeyPklL-1" source="bXoHgO_Jdpie8BC1IQPX-0" target="lCZoUt_bum-l7q1Iv6DA-8" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-14" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="QkdlXIdf6SLyogeyPklL-1" target="lCZoUt_bum-l7q1Iv6DA-4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="457" y="140" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="bXoHgO_Jdpie8BC1IQPX-2" value="deposit ICP" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=16;" parent="lCZoUt_bum-l7q1Iv6DA-14" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1333" y="3" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-2" value="Beam App - Sender" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="382" y="80" width="140" height="57" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-4" value="Escrow Payment Pool Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="412" y="220" width="90" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-6" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" parent="QkdlXIdf6SLyogeyPklL-1" source="lCZoUt_bum-l7q1Iv6DA-5" target="lCZoUt_bum-l7q1Iv6DA-1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="652" y="425" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-17" value="every 3 beats&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="lCZoUt_bum-l7q1Iv6DA-6" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-5" value="IC Heart Beat" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="662" y="395" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-8" value="Beam Out (URL) Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="136" y="220" width="90" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-10" value="" style="endArrow=classic;startArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="QkdlXIdf6SLyogeyPklL-1" source="lCZoUt_bum-l7q1Iv6DA-4" target="lCZoUt_bum-l7q1Iv6DA-1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="502" y="420" as="sourcePoint"/>
+                        <mxPoint x="552" y="370" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="bXoHgO_Jdpie8BC1IQPX-1" value="send URL" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=16;" parent="QkdlXIdf6SLyogeyPklL-1" source="bXoHgO_Jdpie8BC1IQPX-0" target="lCZoUt_bum-l7q1Iv6DA-2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="bXoHgO_Jdpie8BC1IQPX-0" value="Beam App - Receiver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                    <mxGeometry x="111" y="79" width="140" height="57" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="fwaKR-ek-dV-5ZYaGFt3" name="Escrow Payment">
+        <mxGraphModel dx="842" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="HT2WtsV4oOrllWlnnq7f-0"/>
+                <mxCell id="HT2WtsV4oOrllWlnnq7f-1" parent="HT2WtsV4oOrllWlnnq7f-0"/>
+                <mxCell id="gh4WcNRdUZzC-SDo6zht-0" value="&lt;h1&gt;Escrow Payment&lt;/h1&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;dashed=1;fontSize=16;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="40" y="20" width="350" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-5" style="edgeStyle=none;html=1;exitX=0.85;exitY=0.95;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=16;" parent="HT2WtsV4oOrllWlnnq7f-1" source="pSRoo-Zo7BN2_WPRiBGP-0" target="6l7CLA-68eNpDDRx75jp-1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-7" value="Trustless Direct Integration with Chain Key TX" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=16;" parent="6l7CLA-68eNpDDRx75jp-5" vertex="1" connectable="0">
+                    <mxGeometry x="-0.2911" y="-2" relative="1" as="geometry">
+                        <mxPoint x="89" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-6" style="edgeStyle=none;html=1;exitX=0.15;exitY=0.95;exitDx=0;exitDy=0;exitPerimeter=0;fontSize=16;entryX=0.85;entryY=0.05;entryDx=0;entryDy=0;entryPerimeter=0;" parent="HT2WtsV4oOrllWlnnq7f-1" source="pSRoo-Zo7BN2_WPRiBGP-0" target="6l7CLA-68eNpDDRx75jp-3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="290" y="460" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="pSRoo-Zo7BN2_WPRiBGP-0" value="Escrow Payment Pool Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="340" y="290" width="90" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="9ELCmyftUlGTAoU6o-PT-1" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0.05;entryDx=0;entryDy=0;fontSize=16;entryPerimeter=0;" parent="HT2WtsV4oOrllWlnnq7f-1" source="9ELCmyftUlGTAoU6o-PT-0" target="pSRoo-Zo7BN2_WPRiBGP-0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9ELCmyftUlGTAoU6o-PT-2" value="deposit ICP / BTC" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=16;" parent="9ELCmyftUlGTAoU6o-PT-1" vertex="1" connectable="0">
+                    <mxGeometry x="-0.3714" relative="1" as="geometry">
+                        <mxPoint y="10" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9ELCmyftUlGTAoU6o-PT-0" value="Buyer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="240" y="80" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-0" value="claim ICP / BTC" style="edgeStyle=none;html=1;exitX=0.778;exitY=-0.006;exitDx=0;exitDy=0;fontSize=16;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="HT2WtsV4oOrllWlnnq7f-1" source="pSRoo-Zo7BN2_WPRiBGP-0" target="9ELCmyftUlGTAoU6o-PT-3" edge="1">
+                    <mxGeometry x="0.3551" y="-27" relative="1" as="geometry">
+                        <mxPoint x="478" y="140" as="sourcePoint"/>
+                        <mxPoint x="540" y="230" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9ELCmyftUlGTAoU6o-PT-3" value="Creator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="414" y="80" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-1" value="Bitcoin Network" style="shape=cube;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;darkOpacity=0.05;darkOpacity2=0.1;dashed=1;fontSize=16;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="490" y="465" width="120" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="6l7CLA-68eNpDDRx75jp-3" value="ICP Ledger" style="shape=datastore;whiteSpace=wrap;html=1;" parent="HT2WtsV4oOrllWlnnq7f-1" vertex="1">
+                    <mxGeometry x="210" y="460" width="90" height="90" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="QXZWvrSae6cvdkeJ76V1" name="Monitoring">
+        <mxGraphModel dx="842" dy="1989" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="-z-PwYwbVHNwEXJbEGdn-0"/>
+                <mxCell id="-z-PwYwbVHNwEXJbEGdn-1" parent="-z-PwYwbVHNwEXJbEGdn-0"/>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-1" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fontSize=16;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="440" y="26" width="270" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="tXWqpfsSQcir3fG210vC-0" value="Monitoring Agent Canister" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="186" y="78" width="90" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="2BiaCtMyzdDffYhxFGq--1" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0.05;entryDx=0;entryDy=0;entryPerimeter=0;" parent="-z-PwYwbVHNwEXJbEGdn-1" source="tXWqpfsSQcir3fG210vC-2" target="2BiaCtMyzdDffYhxFGq--0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="tXWqpfsSQcir3fG210vC-2" value="ICP Solvency" style="rounded=1;whiteSpace=wrap;html=1;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="86" y="218" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="2BiaCtMyzdDffYhxFGq--2" style="edgeStyle=none;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.85;entryY=0.05;entryDx=0;entryDy=0;entryPerimeter=0;" parent="-z-PwYwbVHNwEXJbEGdn-1" source="tXWqpfsSQcir3fG210vC-3" target="2BiaCtMyzdDffYhxFGq--0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="tXWqpfsSQcir3fG210vC-3" value="BTC Solvency" style="rounded=1;whiteSpace=wrap;html=1;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="266" y="218" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="tXWqpfsSQcir3fG210vC-4" value="" style="endArrow=classic;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="-z-PwYwbVHNwEXJbEGdn-1" target="tXWqpfsSQcir3fG210vC-2" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="186" y="168" as="sourcePoint"/>
+                        <mxPoint x="136" y="198" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="tXWqpfsSQcir3fG210vC-11" value="" style="endArrow=classic;html=1;exitX=1.011;exitY=0.89;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="-z-PwYwbVHNwEXJbEGdn-1" source="tXWqpfsSQcir3fG210vC-0" target="tXWqpfsSQcir3fG210vC-3" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="276" y="178" as="sourcePoint"/>
+                        <mxPoint x="156" y="228" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="2BiaCtMyzdDffYhxFGq--0" value="Escrow Payment Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="186" y="318" width="90" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="33ETkodEXQxMrgzSWCZ3-0" value="&lt;h1&gt;Proactive Monitoring&lt;/h1&gt;" style="text;html=1;strokeColor=none;fillColor=none;spacing=5;spacingTop=-20;whiteSpace=wrap;overflow=hidden;rounded=0;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="36" width="264" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-3" style="edgeStyle=none;html=1;exitX=0.07;exitY=0.4;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.933;entryY=0.58;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;dashPattern=1 1;fontSize=16;" parent="-z-PwYwbVHNwEXJbEGdn-1" source="0fqOGRHrmqtCc2-WGqam-0" target="tXWqpfsSQcir3fG210vC-0" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-4" value="Http Polling" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=16;" parent="0fqOGRHrmqtCc2-WGqam-3" vertex="1" connectable="0">
+                    <mxGeometry x="-0.0523" y="-1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-6" style="edgeStyle=none;html=1;exitX=0.55;exitY=0.95;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;dashed=1;dashPattern=1 1;fontSize=16;" parent="-z-PwYwbVHNwEXJbEGdn-1" source="0fqOGRHrmqtCc2-WGqam-0" target="0fqOGRHrmqtCc2-WGqam-5" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-7" value="Http Health Check" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=16;" parent="0fqOGRHrmqtCc2-WGqam-6" vertex="1" connectable="0">
+                    <mxGeometry x="0.2138" y="2" relative="1" as="geometry">
+                        <mxPoint x="-2" y="23" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-0" value="Uptime Robot" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;dashed=1;fontSize=16;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="485" y="96" width="160" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-2" value="Cloud" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;fontSize=16;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="535" y="39" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="0fqOGRHrmqtCc2-WGqam-5" value="All Canisters" style="shape=datastore;whiteSpace=wrap;html=1;" parent="-z-PwYwbVHNwEXJbEGdn-1" vertex="1">
+                    <mxGeometry x="528" y="350" width="90" height="100" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
