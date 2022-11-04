@@ -1,5 +1,12 @@
 {
   "canisters": {
+    "beam": {
+      "main": "backend/service/Beam.mo",
+      "dependencies": ["ledger", "beamescrow"]
+    },
+    "beamout": {
+      "main": "backend/service/BeamOut.mo"
+    },
     "beamescrow": {
       "main": "backend/service/BeamEscrow.mo",
       "dependencies": ["ledger"]
@@ -7,13 +14,6 @@
     "monitoragent": {
       "main": "backend/service/MonitorAgent.mo",
       "dependencies": ["beamescrow", "ledger"]
-    },
-    "beam": {
-      "main": "backend/service/Beam.mo",
-      "dependencies": ["ledger", "beamescrow"]
-    },
-    "beamout": {
-      "main": "backend/service/BeamOut.mo"
     },
     "ledger": {
       "type": "custom",

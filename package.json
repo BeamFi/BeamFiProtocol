@@ -1,0 +1,16 @@
+{
+  "name": "beamfi",
+  "version": "1.0.0",
+  "author": "Henry Chan",
+  "description": "BeamFi Protocol",
+  "private": true,
+  "keywords": [
+    "internet computer",
+    "icp",
+    "dfinity",
+    "beamfi"
+  ],
+  "scripts": {
+    "dfx:ledger:public": "cd scripts && node use-public-ledger-candid.js"
+  }
+}

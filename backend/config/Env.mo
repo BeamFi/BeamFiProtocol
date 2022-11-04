@@ -4,27 +4,27 @@ import BitcoinType "../bitcoin/BitcoinType";
 
 module Env {
   // Manager - Internet Identity Anchor Id
-  public let managerPrincipalId = "llaiv-papiv-e7wvh-njpek-4e57z-n3fgd-yu3ud-n7tqs-lr5ep-hut3y-wae";
+  public let managerPrincipalId = "#INTERNET_IDENTITY_ANCHOR_ID#";
 
   // Controller Principal Id
-  public let controllerPrincipalId = "ktaun-mznjo-4w2qi-von4m-qodwj-hpm4t-d4yoo-dkzvz-7al2r-px72c-gae";
+  public let controllerPrincipalId = "#CONTROLLER_PRINCIPAL_ID#";
 
   // Client key
-  public let clientKey = "kYWpQC_CJPXkQdz9zuAsnoYu-w_AFiq";
+  public let clientKey = "#CLIENT_KEY#";
 
   // Beam Escrow Canister ID
-  public let beamEscrowCanisterId = "rrkah-fqaaa-aaaaa-aaaaq-cai";
+  public let beamEscrowCanisterId = "#BEAM_ESCROW_CANISTER_ID#";
 
   // Monitor Agent Canister ID
-  public let monitorAgentCanisterId = "x2dwq-7aaaa-aaaaa-aaaxq-cai";
+  public let monitorAgentCanisterId = "#MONITORAGENT_CANISTER_ID#";
 
   // Beam Canister ID
-  public let beamCanisterId = "rno2w-sqaaa-aaaaa-aaacq-cai";
+  public let beamCanisterId = "#BEAM_CANISTER_ID#";
 
   // The Bitcoin network to connect to.
   // When developing locally this should be `Regtest`.
   // When deploying to the IC this should be `Testnet`.
-  public let bitcoinNetwork = "Regtest";
+  public let bitcoinNetwork = "#BITCOIN_NETWORK#";
 
   public func getBitcoinNetwork() : BitcoinType.Network {
     switch bitcoinNetwork {

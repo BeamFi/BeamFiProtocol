@@ -1,0 +1,89 @@
+name: BeamFi Prod CI / CD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.13.0"
+          cache: "npm"
+      - name: Install DFX
+        run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+        env:
+          DFX_VERSION: 0.11.2
+      - run: dfx start --clean --background
+      - name: Download vessel package management
+        run: curl -L -o /usr/local/bin/vessel https://github.com/dfinity/vessel/releases/download/v0.6.3/vessel-linux64
+      - run: chmod +x /usr/local/bin/vessel
+      - name: Configure Escrow related canisters
+        run: ./scripts/configure-local-escrow.sh
+      - name: Update Env used by canister
+        run: ./scripts/update-manager.sh
+        env:
+          INTERNET_IDENTITY_ANCHOR_ID: ${{ secrets.INTERNET_IDENTITY_ANCHOR_ID_PROD }}
+          CONTROLLER_PRINCIPAL_ID: ${{ secrets.CONTROLLER_PRINCIPAL_ID_PROD }}
+          CLIENT_KEY: ${{ secrets.CLIENT_KEY_PROD }}
+          BEAM_CANISTER_ID: ${{ secrets.BEAM_CANISTER_ID_PROD }}
+          BEAM_ESCROW_CANISTER_ID: ${{ secrets.BEAM_ESCROW_CANISTER_ID_PROD }}
+          MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID_PROD }}
+          BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK_PROD }}
+      - name: Deploy Ledger in local DFX server
+        run: ./scripts/deploy-local-ledger.sh
+      - name: Revert Ledger Candid to public for building with other canisters
+        run: npm run dfx:ledger:public
+      - name: Deploy canister in local DFX server
+        run: echo yes | dfx deploy
+      - name: Run Escrow Payment Reentrancy test
+        run: ./backend/test/test-claim-reentrancy.sh
+      - name: Run unit tests in Wasm and DFX test canisters
+        run: npm run test:dfx
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.13.0"
+          cache: "npm"
+      - name: Setup canisters
+        run: ./scripts/setup-prod.sh
+      - name: Install DFX
+        run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+        env:
+          DFX_VERSION: 0.11.2
+      - run: dfx start --clean --background
+      - name: Add DFX identity and wallets
+        run: ./scripts/add-ic-identity.sh
+        env:
+          DFX_IDENTITY: ${{ secrets.DFX_IDENTITY }}
+          DFX_WALLETS: ${{ secrets.DFX_WALLETS }}
+      - name: Download vessel package management
+        run: curl -L -o /usr/local/bin/vessel https://github.com/dfinity/vessel/releases/download/v0.6.3/vessel-linux64
+      - run: chmod +x /usr/local/bin/vessel
+      - name: Update Env used by canister
+        run: ./scripts/update-manager.sh
+        env:
+          INTERNET_IDENTITY_ANCHOR_ID: ${{ secrets.INTERNET_IDENTITY_ANCHOR_ID_PROD }}
+          CONTROLLER_PRINCIPAL_ID: ${{ secrets.CONTROLLER_PRINCIPAL_ID_PROD }}
+          CLIENT_KEY: ${{ secrets.CLIENT_KEY_PROD }}
+          BEAM_CANISTER_ID: ${{ secrets.BEAM_CANISTER_ID_PROD }}
+          BEAM_ESCROW_CANISTER_ID: ${{ secrets.BEAM_ESCROW_CANISTER_ID_PROD }}
+          MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID_PROD }}
+          BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK_PROD }}
+      - name: Build and deploy backend canisters to Internet Computer network
+        run: ./scripts/upgrade-canisters.sh
+      - name: Stop DFX server
+        run: dfx stop
+      - name: Show success mesg
+        run: echo Congratulations! The build and deployment are successful.
