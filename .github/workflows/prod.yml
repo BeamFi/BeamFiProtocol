@@ -24,6 +24,8 @@ jobs:
       - run: chmod +x /usr/local/bin/vessel
       - name: Configure Escrow related canisters
         run: ./scripts/configure-local-escrow.sh
+      - name: Update dfx.cfg for test
+        run: npm run test:dfx:updateconfig
       - name: Update Env used by canister
         run: ./scripts/update-manager.sh
         env:
