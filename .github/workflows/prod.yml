@@ -62,8 +62,8 @@ jobs:
       - name: Add DFX identity and wallets
         run: ./scripts/add-ic-identity.sh
         env:
-          DFX_IDENTITY: ${{ secrets.DFX_IDENTITY }}
-          DFX_WALLETS: ${{ secrets.DFX_WALLETS }}
+          DFX_IDENTITY: ${{ secrets.DFX_IDENTITY_PROD }}
+          DFX_WALLETS: ${{ secrets.DFX_WALLETS_PROD }}
       - name: Download vessel package management
         run: curl -L -o /usr/local/bin/vessel https://github.com/dfinity/vessel/releases/download/v0.6.3/vessel-linux64
       - run: chmod +x /usr/local/bin/vessel
