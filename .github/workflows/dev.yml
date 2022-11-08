@@ -15,7 +15,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16.13.0"
-          cache: "npm"
       - name: Install DFX
         run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
         env:
@@ -26,14 +25,14 @@ jobs:
       - run: chmod +x /usr/local/bin/vessel
       - name: Configure Escrow related canisters
         run: ./scripts/configure-local-escrow.sh
+      - name: Update dfx.cfg for test
+        run: npm run test:dfx:updateconfig
       - name: Update Env used by canister
         run: ./scripts/update-manager.sh
         env:
           INTERNET_IDENTITY_ANCHOR_ID: ${{ secrets.INTERNET_IDENTITY_ANCHOR_ID }}
           CONTROLLER_PRINCIPAL_ID: ${{ secrets.CONTROLLER_PRINCIPAL_ID }}
           CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
-          BEAM_CANISTER_ID: ${{ secrets.BEAM_CANISTER_ID }}
-          BEAM_ESCROW_CANISTER_ID: ${{ secrets.BEAM_ESCROW_CANISTER_ID }}
           MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID }}
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK }}
       - name: Deploy Ledger in local DFX server
@@ -44,8 +43,6 @@ jobs:
         run: echo yes | dfx deploy
       - name: Run Escrow Payment Reentrancy test
         run: ./backend/test/test-claim-reentrancy.sh
-      - name: Run unit tests in Wasm and DFX test canisters
-        run: npm run test:dfx
 
   deploy:
     needs: test
@@ -57,7 +54,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16.13.0"
-          cache: "npm"
       - name: Setup canisters
         run: ./scripts/setup-dev.sh
       - name: Install DFX
