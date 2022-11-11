@@ -4,6 +4,12 @@ BeamFi Protocol is a realtime money streaming protocol.
 
 # Folder Structure
 
+backend/service - Motoko Actor Smart Contract where the canister entry point is.
+backend/model - Motoko model types for Beam, BeamOut, Escrow and persistence store helper
+backend/utils - Common utility modules
+diagram - BeamFi architecture (Install Draw.io integration VSCode extension to view it)
+scripts - CI / CD automation scripts
+
 # Dev Process
 
 ## Git Branches
@@ -70,6 +76,16 @@ Open a separate a new command line Terminal
 
 ```
 > dfx start
+```
+
+## Env Config Setup
+
+To avoid unnecessary direct dependencies in Mototoko Actor for caller permission control, we keep the canister IDs in backend/config/Env.mo which is updated during deployment.
+
+For local development, simply use the preconfigured EnvLocal.mo.
+
+```
+> cp guide/EnvLocal.mo backend/config/Env.mo
 ```
 
 ## ICP Ledger
@@ -227,8 +243,7 @@ Ledger Canister Id: {Put the ledger canister id from above}
 
 ![Add Network](/guide/images/AddNetwork.png)
 
-- Switch to "Local"
-  It should show 0.000 ICP if it works.
+- Switch to "Local". It should show 0.000 ICP if it works.
 
 ![Local Ledger](/guide/images/LocalLedger.png)
 
@@ -279,8 +294,12 @@ Now, you should have everything you need to create Beam from Beam frontend app.
 
 - open http://localhost:3000 in Chrome
 - Click "Create Beam" and follow the instruction to deposit ICP and create beam to another Plug Wallet principal ID
+- After the Beam is created sucessfully, go to My Beams:
 
-Congratulations! 🎉
+If you see this and the Beam rate is updating continuously, Congratulations! 🎉
+
+![My Beams](/guide/images/MyBeams.png)
+
 You have achieved incredible job!
 
 # Automated Test
@@ -290,7 +309,7 @@ You have achieved incredible job!
 
 # Local Bitcoin Integration (Future)
 
-BeamEscrow.mo is refactored from Content Fly EscrowPayment.mo which has Bitcoin Testnet Escrow Payment support.
+BeamEscrow.mo is refactored from Content Fly EscrowPayment.mo which has Bitcoin Testnet Escrow Payment integration.
 
 TODO - Add local Bitcoin configuration guide when we want to integrate Bitcoin to BeamFi frontend.
 
@@ -315,12 +334,6 @@ IC Bitcoin is configured in dfx.json. It's disabled currently.
 > dfx ledger transfer --ledger-canister-id {local ledger canister id} --icp 10 {Plug Wallet Account Id} --memo 1
 
 ```
-
-# Author
-
-Henry Chan
-henry@beamfi.app
-Twitter: @kinwo
 
 # Setting up Github Action CI / CD
 
@@ -352,31 +365,29 @@ E.g. if the identity name is icprod, change icprod to default in the JSON.
 Output:
 
 ```
-
 {
-"identities": {
-"icprod": {
-"ic": "xxxxxx"
+  "identities": {
+  "icprod": {
+    "ic": "xxxxxx"
+    }
+  }
 }
-}
-}
-
 ```
 
 Change to:
 
 ```
-
 {
-"identities": {
-"default": {
-"ic": "xxxxx"
+  "identities": {
+  "default": {
+    "ic": "xxxxx"
+    }
+  }
 }
-}
-}
-
 ```
 
-```
+# Author
 
-```
+Henry Chan  
+henry@beamfi.app  
+Twitter: @kinwo
