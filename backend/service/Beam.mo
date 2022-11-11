@@ -84,7 +84,16 @@ actor Beam {
   // Stop the beam from streaming
   // Callable by Beam sender only
   public shared ({ caller }) func stopBeam(escrowId : EscrowId) : async Result<BeamStatus, ErrorCode> {
-    // TODO - assert caller to be Beam sender
+    // Assert caller to be Beam sender
+    let result = await BeamEscrow.queryMyBeamEscrow(escrowId);
+    let escrow = switch result {
+      case (#ok myContract) myContract;
+      case (#err content) return #err(#permission_denied(EscrowType.errorMesg(content)))
+    };
+
+    if (escrow.buyerPrincipal != caller) {
+      return #err(#permission_denied("Only beam sender can stop the beam"))
+    };
 
     // fetch and update Beam.status to #paused
     let opBeam = BeamStoreHelper.findBeamByEscrowId(beamStore, escrowBeamStore, escrowId);
