@@ -1,0 +1,20 @@
+{
+  "__Candid_UI": {
+    "local": "r7inp-6aaaa-aaaaa-aaabq-cai"
+  },
+  "beam": {
+    "local": "renrk-eyaaa-aaaaa-aaada-cai"
+  },
+  "beamescrow": {
+    "local": "rno2w-sqaaa-aaaaa-aaacq-cai"
+  },
+  "beamout": {
+    "local": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+  },
+  "ledger": {
+    "local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+  },
+  "monitoragent": {
+    "local": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+  }
+}

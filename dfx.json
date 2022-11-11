@@ -30,7 +30,7 @@
   },
   "defaults": {
     "bitcoin": {
-      "enabled": true,
+      "enabled": false,
       "nodes": ["127.0.0.1:18444"],
       "log_level": "info"
     },
