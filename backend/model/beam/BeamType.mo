@@ -32,7 +32,7 @@ module BeamType {
   public type BeamStatus = { #active; #paused; #completed };
   public type BeamSortBy = { #lastProcessedDate };
 
-  public type ErrorCode = { #invalid_beam : Text; #beam_notfound : Text };
+  public type ErrorCode = { #invalid_beam : Text; #beam_notfound : Text; #permission_denied : Text };
 
   public type BeamModel = {
     id : BeamId;
@@ -162,7 +162,8 @@ module BeamType {
   public func errorMesg(errorCode : ErrorCode) : Text {
     switch errorCode {
       case (#invalid_beam content) content;
-      case (#beam_notfound content) content
+      case (#beam_notfound content) content;
+      case (#permission_denied content) content
     }
   };
 
@@ -227,13 +228,9 @@ module BeamType {
     b1.id == b2.id
   };
 
-  public func idKey(id : BeamId) : Trie.Key<BeamId> {
-    { key = id; hash = Text.hash(Nat32.toText(id)) }
-  };
+  public func idKey(id : BeamId) : Trie.Key<BeamId> { { key = id; hash = Text.hash(Nat32.toText(id)) } };
 
-  public func textKey(x : Text) : Trie.Key<Text> {
-    { key = x; hash = Text.hash(x) }
-  };
+  public func textKey(x : Text) : Trie.Key<Text> { { key = x; hash = Text.hash(x) } };
 
   public func dateMetricToJSON(m : BeamDateMetric) : KeyValueText {
     var kvList = JSON.addKeyNat("numBeam", m.numBeam, List.nil());
