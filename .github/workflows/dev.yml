@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "16.13.0"
       - name: Install DFX
-        run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+        run: echo y | sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
         env:
           DFX_VERSION: 0.11.2
       - run: dfx start --clean --background
@@ -41,7 +41,7 @@ jobs:
         run: npm run dfx:ledger:public
       - name: Deploy canister in local DFX server
         run: echo yes | dfx deploy
-      - name: Run Escrow Payment Reentrancy test
+      - name: Run Beam Escrow Reentrancy test
         run: ./backend/test/test-claim-reentrancy.sh
 
   deploy:
