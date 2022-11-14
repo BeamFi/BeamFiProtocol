@@ -4,10 +4,10 @@ BeamFi Protocol is a realtime money streaming protocol.
 
 # Folder Structure
 
-backend/service - Motoko Actor Smart Contract where the canister entry point is.
-backend/model - Motoko model types for Beam, BeamOut, Escrow and persistence store helper
-backend/utils - Common utility modules
-diagram - BeamFi architecture (Install Draw.io integration VSCode extension to view it)
+backend/service - Motoko Actor Smart Contract where the canister entry point is.  
+backend/model - Motoko model types for Beam, BeamOut, Escrow and persistence store helper  
+backend/utils - Common utility modules  
+diagram - BeamFi architecture (Install Draw.io integration VSCode extension to view it)  
 scripts - CI / CD automation scripts
 
 # Dev Process
