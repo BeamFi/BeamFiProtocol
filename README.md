@@ -82,10 +82,10 @@ Open a separate a new command line Terminal
 
 To avoid unnecessary direct dependencies in Mototoko Actor for caller permission control, we keep the canister IDs in backend/config/Env.mo which is updated during deployment.
 
-For local development, simply use the preconfigured EnvLocal.mo.
+For local development, simply use the preconfigured EnvLocal.txt.
 
 ```
-> cp guide/EnvLocal.mo backend/config/Env.mo
+> cp guide/EnvLocal.txt backend/config/Env.mo
 ```
 
 ## ICP Ledger
