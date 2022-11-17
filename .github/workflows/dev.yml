@@ -2,8 +2,6 @@ name: BeamFi Dev CI / CD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [dev]
 
 jobs:
   test:
