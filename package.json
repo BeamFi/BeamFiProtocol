@@ -12,6 +12,10 @@
   ],
   "scripts": {
     "test:dfx:updateconfig": "cd scripts && node update-dfx-config.js",
-    "dfx:ledger:public": "cd scripts && node use-public-ledger-candid.js"
+    "dfx:ledger:public": "cd scripts && node use-public-ledger-candid.js",
+    "topup": "node ./scripts/topup-canisters.js"
+  },
+  "devDependencies": {
+    "eslint": "7"
   }
 }
