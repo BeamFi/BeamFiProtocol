@@ -15,7 +15,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16.13.0"
-          cache: "npm"
       - name: Setup Canister Ids
         run: cp canister_ids_prod.json canister_ids.json
       - name: Install DFX
