@@ -1,4 +1,4 @@
-name:BeamFi Prod Topup Cycles
+name: BeamFi Prod Topup Cycles
 
 on:
   workflow_dispatch:
