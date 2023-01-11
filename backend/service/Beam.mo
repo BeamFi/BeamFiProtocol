@@ -113,6 +113,11 @@ actor Beam {
     #ok(updatedBeam.status)
   };
 
+  // TODO - Implement
+  public shared ({ caller }) func restartBeam(escrowId : EscrowId) : async Result<BeamStatus, ErrorCode> {
+    #ok(#active)
+  };
+
   // Private func - Find and process active BeamModels, called by heartbeat
   func processActiveBeams() : async () {
     let beamArray = Trie.toArray<BeamId, BeamModel, BeamModel>(
@@ -268,6 +273,7 @@ actor Beam {
     // approved canister update - non-anonymous, arg sie <= 256 or 128
     #createBeam : () -> (EscrowId, Time, Period);
     #stopBeam : () -> EscrowId;
+    #restartBeam : () -> EscrowId;
 
     // admin read - won't invoke inspect
     #getActorBalance : () -> ();
@@ -285,6 +291,7 @@ actor Beam {
     switch msg {
       case (#createBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 256);
       case (#stopBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
+      case (#restartBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
       case _ true
     }
   };
