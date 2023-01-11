@@ -391,3 +391,6 @@ Change to:
 Henry Chan  
 henry@beamfi.app  
 Twitter: @kinwo
+
+# License
+See the [License](License) file for license rights and limitations (MIT).
