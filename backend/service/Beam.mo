@@ -95,7 +95,7 @@ actor Beam {
 
   func actionOnBeam(escrowId : EscrowId, status : BeamStatus, caller : Principal) : async Result<BeamStatus, ErrorCode> {
     // Assert caller to be Beam sender
-    let result = await BeamEscrow.queryMyBeamEscrow(escrowId);
+    let result = await BeamEscrow.queryMyBeamEscrowBySender(escrowId, caller);
     let escrow = switch result {
       case (#ok myContract) myContract;
       case (#err content) return #err(#permission_denied(EscrowType.errorMesg(content)))

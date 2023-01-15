@@ -41,6 +41,8 @@ jobs:
         run: echo yes | dfx deploy
       - name: Run Beam Escrow Reentrancy test
         run: ./backend/test/test-claim-reentrancy.sh
+      - name: Run Restart Beam test
+        run: ./backend/test/test-restart-beam.sh
 
   deploy:
     needs: test
