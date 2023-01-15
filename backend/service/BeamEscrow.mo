@@ -541,8 +541,17 @@ actor BeamEscrow {
     EscrowStoreHelper.loadMyBeams(beamEscrowPPStore, escrowStore, caller)
   };
 
+  public query ({ caller }) func queryMyBeamEscrowBySender(id : EscrowId, sender : Principal) : async Result<BeamEscrowContract, EscrowType.ErrorCode> {
+    requireEscrowApprovedCanisters(caller);
+    privateQueryMyBeamEscrow(id, sender)
+  };
+
   public query ({ caller }) func queryMyBeamEscrow(id : EscrowId) : async Result<BeamEscrowContract, EscrowType.ErrorCode> {
-    let result = EscrowStoreHelper.loadMyBeamEscrow(beamEscrowPPStore, escrowStore, caller, id);
+    privateQueryMyBeamEscrow(id, caller)
+  };
+
+  func privateQueryMyBeamEscrow(id : EscrowId, sender : Principal) : Result<BeamEscrowContract, EscrowType.ErrorCode> {
+    let result = EscrowStoreHelper.loadMyBeamEscrow(beamEscrowPPStore, escrowStore, sender, id);
 
     switch result {
       case null #err(#escrow_contract_not_found("Cannot find escrow contract for the id"));
@@ -756,6 +765,7 @@ actor BeamEscrow {
 
     // owner read - won't invoke inspect
     #queryMyBeamEscrow : () -> EscrowId;
+    #queryMyBeamEscrowBySender : () -> (EscrowId, Principal);
     #queryMyBeams : () -> ()
   };
 

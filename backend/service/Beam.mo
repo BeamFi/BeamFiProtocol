@@ -81,21 +81,31 @@ actor Beam {
     #ok(beamId)
   };
 
-  // Stop the beam from streaming
+  // Stop the beam from streaming by setting the status to #paused
   // Callable by Beam sender only
   public shared ({ caller }) func stopBeam(escrowId : EscrowId) : async Result<BeamStatus, ErrorCode> {
+    await actionOnBeam(escrowId, #paused, caller)
+  };
+
+  // Restart the beam by setting status to #active
+  // Callable by Beam sender only
+  public shared ({ caller }) func restartBeam(escrowId : EscrowId) : async Result<BeamStatus, ErrorCode> {
+    await actionOnBeam(escrowId, #active, caller)
+  };
+
+  func actionOnBeam(escrowId : EscrowId, status : BeamStatus, caller : Principal) : async Result<BeamStatus, ErrorCode> {
     // Assert caller to be Beam sender
-    let result = await BeamEscrow.queryMyBeamEscrow(escrowId);
+    let result = await BeamEscrow.queryMyBeamEscrowBySender(escrowId, caller);
     let escrow = switch result {
       case (#ok myContract) myContract;
       case (#err content) return #err(#permission_denied(EscrowType.errorMesg(content)))
     };
 
     if (escrow.buyerPrincipal != caller) {
-      return #err(#permission_denied("Only beam sender can stop the beam"))
+      return #err(#permission_denied("Only beam sender can action on the beam"))
     };
 
-    // fetch and update Beam.status to #paused
+    // fetch and update Beam.status to the status
     let opBeam = BeamStoreHelper.findBeamByEscrowId(beamStore, escrowBeamStore, escrowId);
     let beam = switch opBeam {
       case null {
@@ -105,7 +115,7 @@ actor Beam {
     };
 
     let now = T.now();
-    let updatedBeam = BeamType.updateBeam(beam, now, #paused);
+    let updatedBeam = BeamType.updateBeam(beam, now, status);
 
     // persist beam
     beamStore := BeamStoreHelper.updateBeamStore(beamStore, updatedBeam);
@@ -268,6 +278,7 @@ actor Beam {
     // approved canister update - non-anonymous, arg sie <= 256 or 128
     #createBeam : () -> (EscrowId, Time, Period);
     #stopBeam : () -> EscrowId;
+    #restartBeam : () -> EscrowId;
 
     // admin read - won't invoke inspect
     #getActorBalance : () -> ();
@@ -285,6 +296,7 @@ actor Beam {
     switch msg {
       case (#createBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 256);
       case (#stopBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
+      case (#restartBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
       case _ true
     }
   };
