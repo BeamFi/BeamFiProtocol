@@ -13,13 +13,13 @@ module Env {
   public let clientKey = "kYWpQC_CJPXkQdz9zuAsnoYu-w_AFiq";
 
   // Beam Escrow Canister ID
-  public let beamEscrowCanisterId = "rno2w-sqaaa-aaaaa-aaacq-cai";
+  public let beamEscrowCanisterId = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 
   // Monitor Agent Canister ID
-  public let monitorAgentCanisterId = "rdmx6-jaaaa-aaaaa-aaadq-cai";
+  public let monitorAgentCanisterId = "renrk-eyaaa-aaaaa-aaada-cai";
 
   // Beam Canister ID
-  public let beamCanisterId = "renrk-eyaaa-aaaaa-aaada-cai";
+  public let beamCanisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
 
   // The Bitcoin network to connect to.
   // When developing locally this should be `Regtest`.
