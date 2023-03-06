@@ -26,4 +26,5 @@ run_cmd()
 
 # Deploy & Upgrade Canisters
 npm install -g yes
+mkdir .dfx/ic/canisters/idl
 yes yes | dfx deploy --network ic
