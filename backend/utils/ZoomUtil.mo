@@ -4,6 +4,7 @@ import List "mo:base/List";
 import Text "mo:base/Text";
 import HMAC "mo:crypto/HMAC";
 import SHA256 "mo:crypto/SHA/SHA256";
+import HexUtil "mo:encoding/Hex";
 import JSON "mo:JSON/JSON";
 
 import Env "../config/Env";
@@ -13,6 +14,7 @@ import JSONUtil "../http/JSON";
 module ZoomUtil {
 
   type JSONText = Http.JSONText;
+  type Hex = HexUtil.Hex;
 
   public func processValidationRequest(jsonStr : Text) : JSONText {
     let plainTokenOp : ?Text = extractPlainToken(jsonStr);
@@ -21,22 +23,22 @@ module ZoomUtil {
       case (?v) { v }
     };
 
-    let encryptedTokenOP = createValidationHash(plainToken, Env.zoomSecretToken);
-    var kvList = JSONUtil.addKeyOptText("encryptedToken", encryptedTokenOP, List.nil());
-    // kvList := JSONUtil.addKeyText("plainToken", plainToken, kvList);
+    let encryptedToken = createValidationHash(plainToken, Env.zoomSecretToken);
+    var kvList = JSONUtil.addKeyText("encryptedToken", encryptedToken, List.nil());
+    kvList := JSONUtil.addKeyText("plainToken", plainToken, kvList);
 
     let kvIter = Iter.fromList(kvList);
     "{" # Text.join(",", kvIter) # "}"
   };
 
-  public func createValidationHash(plainToken : Text, zoomSecretToken : Text) : ?Text {
+  public func createValidationHash(plainToken : Text, zoomSecretToken : Text) : Hex {
     let salt = Blob.toArray(Text.encodeUtf8(zoomSecretToken));
 
     let h = HMAC.New(SHA256.New, salt);
     h.write(Blob.toArray(Text.encodeUtf8(plainToken)));
 
     let hash = h.sum([]);
-    Text.decodeUtf8(Blob.fromArray(hash))
+    HexUtil.encode(hash)
   };
 
   public func extractEvent(jsonStr : Text) : ?Text {
