@@ -362,12 +362,12 @@ actor Beam {
     let jsonStr = Text.decodeUtf8(req.body);
 
     switch (jsonStr) {
-      case null Http.BadRequest();
+      case null Http.TextContent("Invalid string");
       case (?myStr) {
         let event = ZoomUtil.extractEvent(myStr);
 
         switch (event) {
-          case null return Http.BadRequest();
+          case null return Http.TextContent("No event found");
           case (?myEvent) {
             switch (myEvent) {
               case "endpoint.url_validation" {
