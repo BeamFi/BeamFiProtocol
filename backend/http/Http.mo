@@ -1,9 +1,9 @@
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import R "mo:base/Result";
 import Text "mo:base/Text";
-import Blob "mo:base/Blob";
 
 module Http {
 
@@ -43,10 +43,14 @@ module Http {
   };
 
   public func BadRequest() : HttpResponse {
+    BadRequestWith("Invalid Request")
+  };
+
+  public func BadRequestWith(mesg : Text) : HttpResponse {
     {
       status_code = 400;
       headers = [];
-      body = Text.encodeUtf8("Invalid request");
+      body = Text.encodeUtf8(mesg);
       upgrade = false
     }
   };
@@ -172,6 +176,16 @@ module Http {
     };
 
     false
+  };
+
+  public func findHeader(headers : [HeaderField], keyName : Text) : ?Text {
+    for ((name, value) in headers.vals()) {
+      if (name == keyName) {
+        return ?value
+      }
+    };
+
+    null
   };
 
 }

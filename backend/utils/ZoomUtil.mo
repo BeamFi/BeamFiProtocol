@@ -14,16 +14,37 @@ import JSONUtil "../http/JSON";
 module ZoomUtil {
 
   type JSONText = Http.JSONText;
+  type HeaderField = Http.HeaderField;
   type Hex = HexUtil.Hex;
+
+  public func verifySignature(jsonStr : JSONText, headers : [HeaderField]) : Bool {
+    let signatureOp = Http.findHeader(headers, "x-zm-signature");
+    let expSignature = switch (signatureOp) {
+      case (null) { return false };
+      case (?v) { v }
+    };
+
+    let timestampOp = Http.findHeader(headers, "x-zm-request-timestamp");
+    let timestamp = switch (timestampOp) {
+      case (null) { return false };
+      case (?v) { v }
+    };
+
+    let message = "v0:" # timestamp # ":" # jsonStr;
+    let hashForVerify = createHash(message, Env.zoomSecretToken);
+    let signature = "v0=" # hashForVerify;
+
+    signature == expSignature
+  };
 
   public func processValidationRequest(jsonStr : Text) : JSONText {
     let plainTokenOp : ?Text = extractPlainToken(jsonStr);
     let plainToken = switch (plainTokenOp) {
-      case (null) { return "" };
-      case (?v) { v }
+      case (null) return "";
+      case (?v) v
     };
 
-    let encryptedToken = createValidationHash(plainToken, Env.zoomSecretToken);
+    let encryptedToken = createHash(plainToken, Env.zoomSecretToken);
     var kvList = JSONUtil.addKeyText("encryptedToken", encryptedToken, List.nil());
     kvList := JSONUtil.addKeyText("plainToken", plainToken, kvList);
 
@@ -31,11 +52,11 @@ module ZoomUtil {
     "{" # Text.join(",", kvIter) # "}"
   };
 
-  public func createValidationHash(plainToken : Text, zoomSecretToken : Text) : Hex {
+  public func createHash(message : Text, zoomSecretToken : Text) : Hex {
     let salt = Blob.toArray(Text.encodeUtf8(zoomSecretToken));
 
     let h = HMAC.New(SHA256.New, salt);
-    h.write(Blob.toArray(Text.encodeUtf8(plainToken)));
+    h.write(Blob.toArray(Text.encodeUtf8(message)));
 
     let hash = h.sum([]);
     HexUtil.encode(hash)
@@ -43,7 +64,7 @@ module ZoomUtil {
 
   public func extractEvent(jsonStr : Text) : ?Text {
     switch (JSON.parse(jsonStr)) {
-      case (null) { return null };
+      case (null) return null;
       case (?v) {
         switch (v) {
           case (#Object(v)) {
@@ -53,10 +74,10 @@ module ZoomUtil {
               case (("event", #String(v))) {
                 return ?v
               };
-              case (_) { return null }
+              case (_) return null
             }
           };
-          case (_) { return null }
+          case (_) return null
         }
       }
     };
@@ -66,28 +87,59 @@ module ZoomUtil {
 
   public func extractPlainToken(jsonStr : Text) : ?Text {
     switch (JSON.parse(jsonStr)) {
-      case (null) { return null };
+      case (null) return null;
       case (?v) {
         switch (v) {
           case (#Object(v)) {
+            if (v.size() < 1) return null;
+
             switch (v[0]) {
               case (("payload", #Object(v))) {
+                if (v.size() < 1) return null;
+
                 switch (v[0]) {
                   case (("plainToken", #String(v))) {
                     return ?v
                   };
-                  case (_) { return null }
+                  case (_) return null
                 }
               };
-              case (_) { return null }
+              case (_) return null
             }
           };
-          case (_) { return null }
+          case (_) return null
         }
       }
     };
 
     return null
+  };
+
+  public func extractMeetingId(jsonStr : Text) : ?Text {
+    let v = switch (JSON.parse(jsonStr)) {
+      case (null) return null;
+      case (?v) v
+    };
+
+    let w = switch (v) {
+      case (#Object(v)) v;
+      case (_) return null
+    };
+
+    let y = switch (w[0]) {
+      case (("payload", #Object(w))) w;
+      case (_) return null
+    };
+
+    let z = switch (y[1]) {
+      case (("object", #Object(y))) y;
+      case (_) return null
+    };
+
+    switch (z[0]) {
+      case (("id", #String(z))) ?z;
+      case (_) return null
+    }
   }
 
 }

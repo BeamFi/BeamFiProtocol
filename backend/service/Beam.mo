@@ -7,6 +7,7 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Int64 "mo:base/Int64";
 import List "mo:base/List";
+import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
@@ -19,17 +20,20 @@ import Trie "mo:base/Trie";
 import Env "../config/Env";
 import Http "../http/Http";
 import JSON "../http/JSON";
+import BeamRelationStoreHelper "../model/beam/BeamRelationStoreHelper";
 import BeamStoreHelper "../model/beam/BeamStoreHelper";
 import BeamType "../model/beam/BeamType";
 import EscrowType "../model/escrow/EscrowType";
 import DateUtil "../utils/DateUtil";
 import Guard "../utils/Guard";
 import Op "../utils/Operation";
+import TextUtil "../utils/TextUtil";
 import ZoomUtil "../utils/ZoomUtil";
 
 actor Beam {
 
   type BeamModel = BeamType.BeamModel;
+  type BeamModelV2 = BeamType.BeamModelV2;
   type BeamReadModel = BeamType.BeamReadModel;
   type BeamId = BeamType.BeamId;
   type Period = BeamType.Period;
@@ -37,6 +41,7 @@ actor Beam {
   type BeamStatus = BeamType.BeamStatus;
   type BeamMetric = BeamType.BeamMetric;
   type BeamDateMetric = BeamType.BeamDateMetric;
+  type BeamRelationObjId = BeamType.BeamRelationObjId;
 
   type EscrowId = EscrowType.EscrowId;
   type Allocation = EscrowType.Allocation;
@@ -54,7 +59,9 @@ actor Beam {
   stable var version : Nat32 = 0;
 
   stable var beamStore : Trie.Trie<BeamId, BeamModel> = Trie.empty();
+  stable var beamStoreV2 : Trie.Trie<BeamId, BeamModelV2> = Trie.empty();
   stable var escrowBeamStore : Trie.Trie<EscrowId, BeamId> = Trie.empty();
+  stable var beamRelationStore : Trie.Trie<BeamRelationObjId, BeamId> = Trie.empty();
 
   let topNBeams : Nat = 5;
   let require = Guard.require;
@@ -64,7 +71,7 @@ actor Beam {
   // 3 beats ~ 6-9 secs
   let hbBeamPaymentEveryN = 3;
 
-  // Public func - Create new Beam for the EscrowContract escrowId
+  // Public func - Create new Beam for the EscrowContract escrowId and start beaming
   // @return beamId if #ok, errorCode if #err
   public shared ({ caller }) func createBeam(escrowId : EscrowId, scheduledEndDate : Time, rate : Period) : async Result<BeamId, ErrorCode> {
     // allow only beamescrow canister
@@ -78,8 +85,29 @@ actor Beam {
     let beam = BeamType.createBeam(beamId, escrowId, scheduledEndDate, rate);
 
     // Add to beamStore and escrowBeamStore
-    beamStore := BeamStoreHelper.updateBeamStore(beamStore, beam);
+    beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, beam);
     escrowBeamStore := BeamStoreHelper.updateEscrowBeamStore(escrowBeamStore, escrowId, beamId);
+
+    // --- Actor state changes commited ---
+    #ok(beamId)
+  };
+
+  // Create new beam with relation to external object id and paused beginning status. Use cases: Zoom Meeting
+  public shared ({ caller }) func createRelationBeam(escrowId : EscrowId, scheduledEndDate : Time, rate : Period, objId : BeamRelationObjId) : async Result<BeamId, ErrorCode> {
+    // allow only beamescrow canister
+    requireBeamEscrowCanisters(caller);
+
+    // --- Atomicity starts ---
+    let beamId = nextBeamId;
+    nextBeamId += 1;
+
+    // Create new Beam
+    let beam = BeamType.createRelationBeam(beamId, escrowId, scheduledEndDate, rate, objId);
+
+    // Add to beamStore, escrowBeamStore and beamEscrowRelationStore
+    beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, beam);
+    escrowBeamStore := BeamStoreHelper.updateEscrowBeamStore(escrowBeamStore, escrowId, beamId);
+    beamRelationStore := BeamRelationStoreHelper.updateBeamRelationStore(beamRelationStore, beamId, objId);
 
     // --- Actor state changes commited ---
     #ok(beamId)
@@ -110,7 +138,7 @@ actor Beam {
     };
 
     // fetch and update Beam.status to the status
-    let opBeam = BeamStoreHelper.findBeamByEscrowId(beamStore, escrowBeamStore, escrowId);
+    let opBeam = BeamStoreHelper.findBeamByEscrowId(beamStoreV2, escrowBeamStore, escrowId);
     let beam = switch opBeam {
       case null {
         return #err(#beam_notfound("Cannot find the beam."))
@@ -122,16 +150,31 @@ actor Beam {
     let updatedBeam = BeamType.updateBeam(beam, now, status);
 
     // persist beam
-    beamStore := BeamStoreHelper.updateBeamStore(beamStore, updatedBeam);
+    beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, updatedBeam);
 
     #ok(updatedBeam.status)
   };
 
+  func privateActionOnBeam(beamId : BeamId, status : BeamStatus) : () {
+    // fetch and update Beam.status to the status
+    let opBeam = BeamStoreHelper.findBeamById(beamStoreV2, beamId);
+    let beam = switch opBeam {
+      case null return;
+      case (?myBeam) myBeam
+    };
+
+    let now = T.now();
+    let updatedBeam = BeamType.updateBeam(beam, now, status);
+
+    // persist beam
+    beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, updatedBeam)
+  };
+
   // Private func - Find and process active BeamModels, called by heartbeat
   func processActiveBeams() : async () {
-    let beamArray = Trie.toArray<BeamId, BeamModel, BeamModel>(
-      beamStore,
-      func(key, value) : BeamModel {
+    let beamArray = Trie.toArray<BeamId, BeamModelV2, BeamModelV2>(
+      beamStoreV2,
+      func(key, value) : BeamModelV2 {
         value
       }
     );
@@ -150,7 +193,7 @@ actor Beam {
 
   // Private func - Beam (stream) payment to creator over time
   // Follow Checks-Effects-Interactions-Rollback pattern
-  func beamPayment(beam : BeamModel) : async () {
+  func beamPayment(beam : BeamModelV2) : async () {
     // ----- Checks
     // only do beaming (streaming) if numSec(now - lastProcessedDate) >= rate
     let now = T.now();
@@ -191,7 +234,7 @@ actor Beam {
       return
     };
 
-    beamStore := BeamStoreHelper.updateBeamStore(beamStore, updatedBeam);
+    beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, updatedBeam);
     // --- Actor state changes commited ---
 
     // ----- Interactions
@@ -208,7 +251,7 @@ actor Beam {
         // --- Atomicity starts ---
 
         // load the beam again due to reentrancy, the beam above may have changed after updateEscrowAllocation
-        let opBeam = BeamStoreHelper.findBeamById(beamStore, updatedBeam.id);
+        let opBeam = BeamStoreHelper.findBeamById(beamStoreV2, updatedBeam.id);
         let currentBeam = switch opBeam {
           case null {
             Debug.print("BeamModel not found");
@@ -218,14 +261,14 @@ actor Beam {
         };
 
         let rollbackedBeam = BeamType.undoBeam(currentBeam, updatedBeam, beam);
-        beamStore := BeamStoreHelper.updateBeamStore(beamStore, rollbackedBeam);
+        beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, rollbackedBeam);
         // --- Actor state changes commited ---
       }
     }
   };
 
   public query func queryBeamByEscrowIds(idArray : [EscrowId]) : async [BeamReadModel] {
-    return BeamStoreHelper.loadBeamReadModelByEscrowIds(beamStore, escrowBeamStore, idArray)
+    return BeamStoreHelper.loadBeamReadModelByEscrowIds(beamStoreV2, escrowBeamStore, idArray)
   };
 
   // Trap if the caller is not BeamEscrow canister
@@ -281,6 +324,7 @@ actor Beam {
   type MesgType = {
     // approved canister update - non-anonymous, arg sie <= 256 or 128
     #createBeam : () -> (EscrowId, Time, Period);
+    #createRelationBeam : () -> (EscrowId, Time, Period, BeamRelationObjId);
     #stopBeam : () -> EscrowId;
     #restartBeam : () -> EscrowId;
 
@@ -299,6 +343,7 @@ actor Beam {
   system func inspect({ arg : Blob; caller : Principal; msg : MesgType }) : Bool {
     switch msg {
       case (#createBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 256);
+      case (#createRelationBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 256);
       case (#stopBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
       case (#restartBeam _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 128);
       case _ true
@@ -307,8 +352,8 @@ actor Beam {
 
   // Metrics - reportMetric in HTTP request: {totalNumBeam, groupByDate: [{numBeam, date}]}
   func reportMetric() : BeamMetric {
-    let totalNumBeam : Nat = BeamStoreHelper.queryTotalBeam(beamStore);
-    let groupByDate : [BeamDateMetric] = BeamStoreHelper.queryBeamDate(beamStore);
+    let totalNumBeam : Nat = BeamStoreHelper.queryTotalBeam(beamStoreV2);
+    let groupByDate : [BeamDateMetric] = BeamStoreHelper.queryBeamDate(beamStoreV2);
 
     {
       totalNumBeam;
@@ -322,7 +367,6 @@ actor Beam {
     switch (parsedURL) {
       case (#err(_)) Http.BadRequest();
       case (#ok(endPoint, queryParams)) {
-
         switch (endPoint) {
           case "/metric" {
             processMetricRequest(queryParams)
@@ -374,7 +418,44 @@ actor Beam {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
                 return Http.JsonContent(jsonRes, false)
               };
-              case _ return Http.TextContent("No matching events found")
+              case ("meeting.started" or "meeting.ended") {
+                let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
+                if (not isAuthentic) {
+                  return Http.BadRequestWith("Invalid signature")
+                };
+
+                // start Beam
+                let meetingIdOp = ZoomUtil.extractMeetingId(myStr);
+                let meetingId = switch (meetingIdOp) {
+                  case null return Http.BadRequestWith("Invalid meeting id");
+                  case (?id) id
+                };
+
+                let meetingIdNatOp = TextUtil.textToNat(meetingId);
+                let meetingIdNat = switch (meetingIdNatOp) {
+                  case null return Http.BadRequestWith("Invalid meeting id");
+                  case (?id) id
+                };
+
+                let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, Nat32.fromNat(meetingIdNat));
+                let beamId = switch (beamIdOp) {
+                  case null return Http.BadRequestWith("Beam Id not found");
+                  case (?id) id
+                };
+
+                let newStatus = switch (myEvent) {
+                  case "meeting.started" #active;
+                  case "meeting.ended" #paused;
+                  case _ #active
+                };
+
+                privateActionOnBeam(beamId, newStatus);
+
+                return Http.TextContent("Event processed successfully")
+              };
+              case _ {
+                return Http.TextContent("No matching events found")
+              }
             }
           }
         };
@@ -382,6 +463,16 @@ actor Beam {
         Http.JsonContent("", false)
       }
     }
-  }
+  };
+
+  system func postupgrade() {
+    // only upgrade if beamStoreV2 is empty
+    if (not Trie.isEmpty(beamStoreV2)) {
+      Debug.print("Skip migrating beamStore to beamStoreV2 as beamStoreV2 is not empty");
+      return
+    };
+
+    beamStoreV2 := BeamStoreHelper.upgradeBeamStore(beamStore)
+  };
 
 }

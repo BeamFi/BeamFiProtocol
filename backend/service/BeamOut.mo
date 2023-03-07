@@ -152,7 +152,7 @@ actor BeamOut {
   system func postupgrade() {
     // only upgrade if beamOutStoreV2 is empty
     if (not Trie.isEmpty(beamOutStoreV2)) {
-      Debug.print("Skip upgrade beamOutStoreV2 as it's not empty");
+      Debug.print("Skip migrating beamOutStore to beamOutStoreV2 as beamOutStoreV2 is not empty");
       return
     };
 

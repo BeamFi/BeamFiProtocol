@@ -1,18 +1,17 @@
-import T "mo:base/Time";
-import Trie "mo:base/Trie";
-import Option "mo:base/Option";
-import Hash "mo:base/Hash";
-import Text "mo:base/Text";
-import Nat32 "mo:base/Nat32";
-import Order "mo:base/Order";
 import Debug "mo:base/Debug";
+import Hash "mo:base/Hash";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
-
-import EscrowType "../escrow/EscrowType";
+import Nat32 "mo:base/Nat32";
+import Option "mo:base/Option";
+import Order "mo:base/Order";
+import Text "mo:base/Text";
+import T "mo:base/Time";
+import Trie "mo:base/Trie";
 
 import JSON "../../http/JSON";
+import EscrowType "../escrow/EscrowType";
 
 module BeamType {
 
@@ -28,11 +27,25 @@ module BeamType {
   type KeyValueList = JSON.KeyValueList;
 
   public type BeamStore = Trie.Trie<BeamId, BeamModel>;
+  public type BeamStoreV2 = Trie.Trie<BeamId, BeamModelV2>;
   public type EscrowBeamStore = Trie.Trie<EscrowId, BeamId>;
+  public type BeamRelationStore = Trie.Trie<BeamRelationObjId, BeamId>;
+
   public type BeamStatus = { #active; #paused; #completed };
   public type BeamSortBy = { #lastProcessedDate };
 
   public type ErrorCode = { #invalid_beam : Text; #beam_notfound : Text; #permission_denied : Text };
+
+  public type BeamRelationObjId = Nat32;
+
+  public type BeamType = {
+    #payment;
+    #relation : BeamRelationModel
+  };
+
+  public type BeamRelationModel = {
+    objId : BeamRelationObjId
+  };
 
   public type BeamModel = {
     id : BeamId;
@@ -45,6 +58,20 @@ module BeamType {
     lastProcessedDate : Time;
     createdAt : Time;
     updatedAt : Time
+  };
+
+  public type BeamModelV2 = {
+    id : BeamId;
+    escrowId : EscrowId;
+    startDate : Time;
+    scheduledEndDate : Time;
+    actualEndDate : ?Time;
+    rate : Period;
+    status : BeamStatus;
+    lastProcessedDate : Time;
+    createdAt : Time;
+    updatedAt : Time;
+    beamType : BeamType
   };
 
   public type BeamReadModel = {
@@ -67,7 +94,7 @@ module BeamType {
     dateString : Text
   };
 
-  public func createBeam(id : BeamId, escrowId : EscrowId, scheduledEndDate : Time, rate : Period) : BeamModel {
+  public func createBeam(id : BeamId, escrowId : EscrowId, scheduledEndDate : Time, rate : Period) : BeamModelV2 {
     let now = T.now();
     {
       id = id;
@@ -79,11 +106,31 @@ module BeamType {
       status = #active;
       lastProcessedDate = now;
       createdAt = now;
-      updatedAt = now
+      updatedAt = now;
+      beamType = #payment
     }
   };
 
-  public func updateBeam(beam : BeamModel, processedDate : Time, status : BeamStatus) : BeamModel {
+  public func createRelationBeam(id : BeamId, escrowId : EscrowId, scheduledEndDate : Time, rate : Period, objId : BeamRelationObjId) : BeamModelV2 {
+    let now = T.now();
+    {
+      id = id;
+      escrowId = escrowId;
+      startDate = now;
+      scheduledEndDate = scheduledEndDate;
+      actualEndDate = null;
+      rate = rate;
+      status = #paused;
+      lastProcessedDate = now;
+      createdAt = now;
+      updatedAt = now;
+      beamType = #relation({
+        objId = objId
+      })
+    }
+  };
+
+  public func updateBeam(beam : BeamModelV2, processedDate : Time, status : BeamStatus) : BeamModelV2 {
     let now = T.now();
     let actualEndDate = do {
       // set actualEndDate to now if the new status is #completed and different from original status
@@ -104,11 +151,12 @@ module BeamType {
       status = status;
       lastProcessedDate = processedDate;
       createdAt = beam.createdAt;
-      updatedAt = now
+      updatedAt = now;
+      beamType = beam.beamType
     }
   };
 
-  public func undoBeam(currentBeam : BeamModel, updatedBeam : BeamModel, orgBeam : BeamModel) : BeamModel {
+  public func undoBeam(currentBeam : BeamModelV2, updatedBeam : BeamModelV2, orgBeam : BeamModelV2) : BeamModelV2 {
     let now = T.now();
 
     // undo status and actualEndDate if currentBeam.status != orgiginal status and the latest update is from my call
@@ -139,11 +187,12 @@ module BeamType {
       status = status;
       lastProcessedDate = currentBeam.lastProcessedDate;
       createdAt = currentBeam.createdAt;
-      updatedAt = now
+      updatedAt = now;
+      beamType = currentBeam.beamType
     }
   };
 
-  public func validateBeam(beam : BeamModel) : Bool {
+  public func validateBeam(beam : BeamModelV2) : Bool {
     // if actualEndDate is set, actualEndDate must be > startDate
     if (Option.isSome(beam.actualEndDate)) {
       switch (beam.actualEndDate) {
@@ -167,13 +216,13 @@ module BeamType {
     }
   };
 
-  public func printBeamArray(beamArray : [BeamModel]) {
+  public func printBeamArray(beamArray : [BeamModelV2]) {
     for (beam in beamArray.vals()) {
       Debug.print(debug_show (beam))
     }
   };
 
-  public func hash(beam : BeamModel) : Hash {
+  public func hash(beam : BeamModelV2) : Hash {
     Text.hash(Nat32.toText(beam.id))
   };
 
@@ -186,7 +235,7 @@ module BeamType {
   };
 
   // asc order - the most recent will goto the bottom
-  public func compareByLastProcessedDate(b1 : BeamModel, b2 : BeamModel) : Order.Order {
+  public func compareByLastProcessedDate(b1 : BeamModelV2, b2 : BeamModelV2) : Order.Order {
     if (b1.lastProcessedDate > b2.lastProcessedDate) {
       return #less
     };
@@ -199,7 +248,7 @@ module BeamType {
   };
 
   // asc order - the most recent will goto the bottom
-  public func compareByStartDate(b1 : BeamModel, b2 : BeamModel) : Order.Order {
+  public func compareByStartDate(b1 : BeamModelV2, b2 : BeamModelV2) : Order.Order {
     if (b1.startDate > b2.startDate) {
       return #less
     };
@@ -224,11 +273,14 @@ module BeamType {
     return #equal
   };
 
-  public func equal(b1 : BeamModel, b2 : BeamModel) : Bool {
+  public func equal(b1 : BeamModelV2, b2 : BeamModelV2) : Bool {
     b1.id == b2.id
   };
 
   public func idKey(id : BeamId) : Trie.Key<BeamId> { { key = id; hash = Text.hash(Nat32.toText(id)) } };
+  public func relIdKey(id : BeamRelationObjId) : Trie.Key<BeamRelationObjId> {
+    { key = id; hash = Text.hash(Nat32.toText(id)) }
+  };
 
   public func textKey(x : Text) : Trie.Key<Text> { { key = x; hash = Text.hash(x) } };
 
