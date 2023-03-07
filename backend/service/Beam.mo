@@ -1,28 +1,31 @@
-import Principal "mo:base/Principal";
+import BeamEscrow "canister:beamescrow";
+
+import Blob "mo:base/Blob";
+import Debug "mo:base/Debug";
 import Cycles "mo:base/ExperimentalCycles";
 import Float "mo:base/Float";
-import Int64 "mo:base/Int64";
-import Nat64 "mo:base/Nat64";
-import Nat32 "mo:base/Nat32";
-import Trie "mo:base/Trie";
-import R "mo:base/Result";
-import T "mo:base/Time";
 import Int "mo:base/Int";
-import Debug "mo:base/Debug";
+import Int64 "mo:base/Int64";
 import List "mo:base/List";
+import Nat32 "mo:base/Nat32";
+import Nat64 "mo:base/Nat64";
+import Nat8 "mo:base/Nat8";
+import Principal "mo:base/Principal";
+import R "mo:base/Result";
+import Text "mo:base/Text";
+import T "mo:base/Time";
+import Trie "mo:base/Trie";
 
-import Op "../utils/Operation";
 import Env "../config/Env";
-import Guard "../utils/Guard";
 import Http "../http/Http";
 import JSON "../http/JSON";
-
-import BeamType "../model/beam/BeamType";
 import BeamStoreHelper "../model/beam/BeamStoreHelper";
+import BeamType "../model/beam/BeamType";
 import EscrowType "../model/escrow/EscrowType";
 import DateUtil "../utils/DateUtil";
-
-import BeamEscrow "canister:beamescrow";
+import Guard "../utils/Guard";
+import Op "../utils/Operation";
+import ZoomUtil "../utils/ZoomUtil";
 
 actor Beam {
 
@@ -40,6 +43,7 @@ actor Beam {
 
   type HttpRequest = Http.HttpRequest;
   type HttpResponse = Http.HttpResponse;
+  type QueryParam = Http.QueryParam;
 
   type KeyValueText = JSON.KeyValueText;
 
@@ -318,24 +322,66 @@ actor Beam {
     switch (parsedURL) {
       case (#err(_)) Http.BadRequest();
       case (#ok(endPoint, queryParams)) {
-        if (not Http.checkKey(queryParams, "clientKey", Env.clientKey)) {
-          return Http.BadRequest()
-        };
 
         switch (endPoint) {
           case "/metric" {
-            let metric = reportMetric();
-            let jsonText = BeamType.toJSON(metric);
-            Http.JsonContent(jsonText, false)
+            processMetricRequest(queryParams)
           };
           case "/health" {
-            let jsonText = JSON.createArray("result", List.nil<KeyValueText>());
-            Http.JsonContent(jsonText, false)
+            processHealthRequest(queryParams)
+          };
+          case "/zoom" {
+            processZoomRequest(req)
           };
           case _ Http.BadRequest()
         }
       }
     }
   };
+
+  func processMetricRequest(queryParams : [QueryParam]) : HttpResponse {
+    if (not Http.checkKey(queryParams, "clientKey", Env.clientKey)) {
+      return Http.BadRequest()
+    };
+
+    let metric = reportMetric();
+    let jsonText = BeamType.toJSON(metric);
+    Http.JsonContent(jsonText, false)
+  };
+
+  func processHealthRequest(queryParams : [QueryParam]) : HttpResponse {
+    if (not Http.checkKey(queryParams, "clientKey", Env.clientKey)) {
+      return Http.BadRequest()
+    };
+
+    let jsonText = JSON.createArray("result", List.nil<KeyValueText>());
+    Http.JsonContent(jsonText, false)
+  };
+
+  func processZoomRequest(req : HttpRequest) : HttpResponse {
+    let jsonStr = Text.decodeUtf8(req.body);
+
+    switch (jsonStr) {
+      case null Http.BadRequest();
+      case (?myStr) {
+        let event = ZoomUtil.extractEvent(myStr);
+
+        switch (event) {
+          case null return Http.BadRequest();
+          case (?myEvent) {
+            switch (myEvent) {
+              case "endpoint.url_validation" {
+                let jsonRes = ZoomUtil.processValidationRequest(myStr);
+                return Http.JsonContent(jsonRes, false)
+              };
+              case _ return Http.TextContent("No matching event")
+            }
+          }
+        };
+
+        Http.JsonContent("", false)
+      }
+    }
+  }
 
 }

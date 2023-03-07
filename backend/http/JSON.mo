@@ -1,9 +1,9 @@
+import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
-import Nat32 "mo:base/Nat32";
 import Nat "mo:base/Nat";
+import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
-import Int "mo:base/Int";
 
 module JSON {
 
