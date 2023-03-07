@@ -23,7 +23,7 @@ module ZoomUtil {
 
     let encryptedTokenOP = createValidationHash(plainToken, Env.zoomSecretToken);
     var kvList = JSONUtil.addKeyOptText("encryptedToken", encryptedTokenOP, List.nil());
-    kvList := JSONUtil.addKeyText("plainToken", plainToken, kvList);
+    // kvList := JSONUtil.addKeyText("plainToken", plainToken, kvList);
 
     let kvIter = Iter.fromList(kvList);
     "{" # Text.join(",", kvIter) # "}"
