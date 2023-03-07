@@ -45,7 +45,9 @@ module ZoomUtil {
       case (?v) {
         switch (v) {
           case (#Object(v)) {
-            switch (v[0]) {
+            if (v.size() != 3) return null;
+
+            switch (v[2]) {
               case (("event", #String(v))) {
                 return ?v
               };
