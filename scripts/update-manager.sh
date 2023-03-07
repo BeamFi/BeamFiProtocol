@@ -21,4 +21,7 @@ sed -i.bak 's/#BEAM_CANISTER_ID#/'"$BEAM_CANISTER_ID"'/g' './backend/config/Env.
 echo Setting Bitcoin Network to $BITCOIN_NETWORK
 sed -i.bak 's/#BITCOIN_NETWORK#/'"$BITCOIN_NETWORK"'/g' './backend/config/Env.mo'
 
+echo Setting Zoom Secret Token to $ZOOM_SECRET_TOKEN
+sed -i.bak 's/#ZOOM_SECRET_TOKEN#/'"$ZOOM_SECRET_TOKEN"'/g' './backend/config/Env.mo'
+
 rm ./backend/config/Env.mo.bak
