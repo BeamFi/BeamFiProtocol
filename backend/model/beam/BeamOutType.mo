@@ -1,13 +1,13 @@
-import T "mo:base/Time";
-import Trie "mo:base/Trie";
 import H "mo:base/Hash";
-import Text "mo:base/Text";
+import Int "mo:base/Int";
+import Iter "mo:base/Iter";
+import List "mo:base/List";
 import Nat32 "mo:base/Nat32";
 import Order "mo:base/Order";
 import Principal "mo:base/Principal";
-import Iter "mo:base/Iter";
-import List "mo:base/List";
-import Int "mo:base/Int";
+import Text "mo:base/Text";
+import T "mo:base/Time";
+import Trie "mo:base/Trie";
 
 import JSON "../../http/JSON";
 
@@ -15,6 +15,8 @@ module BeamOutType {
 
   public type BeamOutId = Nat32;
   public type BeamOutStore = Trie.Trie<BeamOutId, BeamOutModel>;
+  public type BeamOutStoreV2 = Trie.Trie<BeamOutId, BeamOutModelV2>;
+  public type BeamOutMeetingId = Nat32;
 
   // e8s token format
   public type TokenAmount = Nat64;
@@ -32,6 +34,22 @@ module BeamOutType {
     #duplicated_id : Text
   };
 
+  public type BeamOutType = {
+    #payment;
+    #meeting : BeamOutMeetingModel
+  };
+
+  public type BeamOutModelV2 = {
+    id : BeamOutId;
+    createdAt : Time;
+    updatedAt : Time;
+    tokenType : TokenType;
+    amount : TokenAmount;
+    recipient : Principal;
+    durationNumDays : Nat32;
+    beamOutType : BeamOutType
+  };
+
   public type BeamOutModel = {
     id : BeamOutId;
     createdAt : Time;
@@ -40,6 +58,11 @@ module BeamOutType {
     amount : TokenAmount;
     recipient : Principal;
     durationNumDays : Nat32
+  };
+
+  public type BeamOutMeetingModel = {
+    meetingId : BeamOutMeetingId;
+    meetingPassword : Text
   };
 
   public type BeamOutMetric = {
@@ -58,7 +81,7 @@ module BeamOutType {
     amount : TokenAmount,
     recipient : Principal,
     durationNumDays : Nat32
-  ) : BeamOutModel {
+  ) : BeamOutModelV2 {
     let now = T.now();
     {
       id = id;
@@ -67,7 +90,33 @@ module BeamOutType {
       tokenType = tokenType;
       amount = amount;
       recipient = recipient;
-      durationNumDays = durationNumDays
+      durationNumDays = durationNumDays;
+      beamOutType = #payment
+    }
+  };
+
+  public func createBeamOutMeeting(
+    id : BeamOutId,
+    tokenType : TokenType,
+    amount : TokenAmount,
+    recipient : Principal,
+    durationNumDays : Nat32,
+    meetingId : BeamOutMeetingId,
+    meetingPassword : Text
+  ) : BeamOutModelV2 {
+    let now = T.now();
+    {
+      id = id;
+      createdAt = now;
+      updatedAt = now;
+      tokenType = tokenType;
+      amount = amount;
+      recipient = recipient;
+      durationNumDays = durationNumDays;
+      beamOutType = #meeting({
+        meetingId = meetingId;
+        meetingPassword = meetingPassword
+      })
     }
   };
 
@@ -83,9 +132,7 @@ module BeamOutType {
     id1 == id2
   };
 
-  public func textKey(x : Text) : Trie.Key<Text> {
-    { key = x; hash = Text.hash(x) }
-  };
+  public func textKey(x : Text) : Trie.Key<Text> { { key = x; hash = Text.hash(x) } };
 
   // desc order - the most recent will goto the top
   public func compareByCreatedAt(b1 : BeamOutModel, b2 : BeamOutModel) : Order.Order {
@@ -117,9 +164,7 @@ module BeamOutType {
     b1.id == b2.id
   };
 
-  public func idKey(id : BeamOutId) : Trie.Key<BeamOutId> {
-    { key = id; hash = Text.hash(Nat32.toText(id)) }
-  };
+  public func idKey(id : BeamOutId) : Trie.Key<BeamOutId> { { key = id; hash = Text.hash(Nat32.toText(id)) } };
 
   public func dateMetricToJSON(m : BeamOutDateMetric) : KeyValueText {
     var kvList = JSON.addKeyNat("numURL", m.numURL, List.nil());

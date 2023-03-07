@@ -1,25 +1,26 @@
-import Trie "mo:base/Trie";
-import Nat32 "mo:base/Nat32";
-import Int "mo:base/Int";
-import Text "mo:base/Text";
 import Array "mo:base/Array";
-
-import BeamOutType "./BeamOutType";
+import Int "mo:base/Int";
+import Nat32 "mo:base/Nat32";
+import Text "mo:base/Text";
+import Trie "mo:base/Trie";
 
 import DateTimeUtil "../../utils/DateTimeUtil";
+import BeamOutType "./BeamOutType";
 
 module BeamOutStoreHelper {
 
   type BeamOutId = BeamOutType.BeamOutId;
+  type BeamOutModelV2 = BeamOutType.BeamOutModelV2;
+  type BeamOutStoreV2 = BeamOutType.BeamOutStoreV2;
   type BeamOutModel = BeamOutType.BeamOutModel;
   type BeamOutStore = BeamOutType.BeamOutStore;
   type BeamOutDateMetric = BeamOutType.BeamOutDateMetric;
 
-  public func findBeamOutById(beamOutStore : BeamOutStore, id : BeamOutId) : ?BeamOutModel {
-    return Trie.find<BeamOutId, BeamOutModel>(beamOutStore, BeamOutType.idKey(id), Nat32.equal)
+  public func findBeamOutById(beamOutStore : BeamOutStoreV2, id : BeamOutId) : ?BeamOutModelV2 {
+    return Trie.find<BeamOutId, BeamOutModelV2>(beamOutStore, BeamOutType.idKey(id), Nat32.equal)
   };
 
-  public func updateBeamOutStore(beamOutStore : BeamOutStore, beamOut : BeamOutModel) : BeamOutStore {
+  public func updateBeamOutStore(beamOutStore : BeamOutStoreV2, beamOut : BeamOutModelV2) : BeamOutStoreV2 {
     let newStore = Trie.put(
       beamOutStore,
       BeamOutType.idKey(beamOut.id),
@@ -29,20 +30,20 @@ module BeamOutStoreHelper {
     return newStore
   };
 
-  public func queryTotalBeamOut(store : BeamOutStore) : Nat {
+  public func queryTotalBeamOut(store : BeamOutStoreV2) : Nat {
     Trie.size(store)
   };
 
-  func convertBeamOutTrieToArray(store : BeamOutStore) : [BeamOutModel] {
-    Trie.toArray<BeamOutId, BeamOutModel, BeamOutModel>(
+  func convertBeamOutTrieToArray(store : BeamOutStoreV2) : [BeamOutModelV2] {
+    Trie.toArray<BeamOutId, BeamOutModelV2, BeamOutModelV2>(
       store,
-      func(key, value) : BeamOutModel {
+      func(key, value) : BeamOutModelV2 {
         value
       }
     )
   };
 
-  public func queryBeamOutDate(store : BeamOutStore) : [BeamOutDateMetric] {
+  public func queryBeamOutDate(store : BeamOutStoreV2) : [BeamOutDateMetric] {
     var dateTrie : Trie.Trie<Text, Nat> = Trie.empty();
     let beamOutArray = convertBeamOutTrieToArray(store);
 
@@ -65,13 +66,29 @@ module BeamOutStoreHelper {
 
     let result = Trie.toArray<Text, Nat, BeamOutDateMetric>(
       dateTrie,
-      func(key, value) : BeamOutDateMetric {
-        { dateString = key; numURL = value }
-      }
+      func(key, value) : BeamOutDateMetric { { dateString = key; numURL = value } }
     );
 
     let sortByFunc = BeamOutType.compareByDateString;
     Array.sort<BeamOutDateMetric>(result, sortByFunc)
+  };
+
+  public func upgradeBeamOutStore(oldStore : BeamOutStore) : BeamOutStoreV2 {
+    Trie.mapFilter<BeamOutId, BeamOutModel, BeamOutModelV2>(
+      oldStore,
+      func(beamOutId, old) : ?BeamOutModelV2 {
+        ?{
+          id = old.id;
+          createdAt = old.createdAt;
+          updatedAt = old.updatedAt;
+          tokenType = old.tokenType;
+          amount = old.amount;
+          recipient = old.recipient;
+          durationNumDays = old.durationNumDays;
+          beamOutType = #payment
+        }
+      }
+    )
   }
 
 }
