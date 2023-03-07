@@ -374,7 +374,7 @@ actor Beam {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
                 return Http.JsonContent(jsonRes, false)
               };
-              case _ return Http.TextContent("No matching event")
+              case _ return Http.TextContent("No matching events found")
             }
           }
         };
