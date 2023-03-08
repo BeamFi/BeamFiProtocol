@@ -15,8 +15,8 @@ module BeamOutType {
 
   public type BeamOutId = Nat32;
   public type BeamOutStore = Trie.Trie<BeamOutId, BeamOutModel>;
-  public type BeamOutStoreV2 = Trie.Trie<BeamOutId, BeamOutModelV2>;
-  public type BeamOutStoreV3 = Trie.Trie<BeamOutId, BeamOutModelV3>;
+  public type BeamOutStoreV4 = Trie.Trie<BeamOutId, BeamOutModelV4>;
+
   public type BeamOutMeetingId = Nat32;
   public type BeamOutMeetingString = Text;
 
@@ -41,25 +41,14 @@ module BeamOutType {
     #meeting : BeamOutMeetingModel
   };
 
-  type BeamOutModelV2 = {
+  public type BeamOutModelV4 = {
     id : BeamOutId;
     createdAt : Time;
     updatedAt : Time;
     tokenType : TokenType;
     amount : TokenAmount;
     recipient : Principal;
-    durationNumDays : Nat32;
-    beamOutType : BeamOutType
-  };
-
-  public type BeamOutModelV3 = {
-    id : BeamOutId;
-    createdAt : Time;
-    updatedAt : Time;
-    tokenType : TokenType;
-    amount : TokenAmount;
-    recipient : Principal;
-    durationNumDays : Nat32;
+    durationNumMins : Nat32;
     beamOutType : BeamOutTypeV3
   };
 
@@ -103,8 +92,8 @@ module BeamOutType {
     tokenType : TokenType,
     amount : TokenAmount,
     recipient : Principal,
-    durationNumDays : Nat32
-  ) : BeamOutModelV3 {
+    durationNumMins : Nat32
+  ) : BeamOutModelV4 {
     let now = T.now();
     {
       id = id;
@@ -113,7 +102,7 @@ module BeamOutType {
       tokenType = tokenType;
       amount = amount;
       recipient = recipient;
-      durationNumDays = durationNumDays;
+      durationNumMins = durationNumMins;
       beamOutType = #payment
     }
   };
@@ -123,10 +112,10 @@ module BeamOutType {
     tokenType : TokenType,
     amount : TokenAmount,
     recipient : Principal,
-    durationNumDays : Nat32,
+    durationNumMins : Nat32,
     meetingId : BeamOutMeetingString,
     meetingPassword : Text
-  ) : BeamOutModelV3 {
+  ) : BeamOutModelV4 {
     let now = T.now();
     {
       id = id;
@@ -135,7 +124,7 @@ module BeamOutType {
       tokenType = tokenType;
       amount = amount;
       recipient = recipient;
-      durationNumDays = durationNumDays;
+      durationNumMins = durationNumMins;
       beamOutType = #meeting({
         meetingId = meetingId;
         meetingPassword = meetingPassword

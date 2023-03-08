@@ -20,13 +20,13 @@ import NumberUtil "../utils/NumberUtil";
 actor BeamOut {
 
   type BeamOutId = BeamOutType.BeamOutId;
+  type BeamOutModelV4 = BeamOutType.BeamOutModelV4;
+
   type TokenType = BeamOutType.TokenType;
   type TokenAmount = BeamOutType.TokenAmount;
 
-  type BeamOutModelV3 = BeamOutType.BeamOutModelV3;
   type BeamOutStore = BeamOutType.BeamOutStore;
-  type BeamOutStoreV2 = BeamOutType.BeamOutStoreV2;
-  type BeamOutStoreV3 = BeamOutType.BeamOutStoreV3;
+  type BeamOutStoreV4 = BeamOutType.BeamOutStoreV4;
 
   type BeamOutMetric = BeamOutType.BeamOutMetric;
   type BeamOutDateMetric = BeamOutType.BeamOutDateMetric;
@@ -47,9 +47,9 @@ actor BeamOut {
   let version : Nat32 = 1;
 
   stable var beamOutStore : BeamOutStore = Trie.empty();
-  stable var beamOutStoreV3 : BeamOutStoreV3 = Trie.empty();
+  stable var beamOutStoreV4 : BeamOutStoreV4 = Trie.empty();
 
-  public func createBeamOut(amount : TokenAmount, tokenType : TokenType, recipient : Principal, durationNumDays : Nat32) : async Result<BeamOutId, ErrorCode> {
+  public func createBeamOut(amount : TokenAmount, tokenType : TokenType, recipient : Principal, durationNumMins : Nat32) : async Result<BeamOutId, ErrorCode> {
     // Generate 9 digits random id
     let opId = await NumberUtil.generateRandomDigits(9);
     let id = switch opId {
@@ -58,22 +58,22 @@ actor BeamOut {
     };
 
     // Create BeamOutModel
-    let beamOut = BeamOutType.createBeamOut(id, tokenType, amount, recipient, durationNumDays);
+    let beamOut = BeamOutType.createBeamOut(id, tokenType, amount, recipient, durationNumMins);
 
     // Check if there is duplicate id
-    let found = BeamOutStoreHelper.findBeamOutById(beamOutStoreV3, id);
+    let found = BeamOutStoreHelper.findBeamOutById(beamOutStoreV4, id);
     if (not Option.isNull(found)) {
       return #err(#duplicated_id("Duplicated id is found"))
     };
 
     // Persist BeamOutModel to store
-    beamOutStoreV3 := BeamOutStoreHelper.updateBeamOutStore(beamOutStoreV3, beamOut);
+    beamOutStoreV4 := BeamOutStoreHelper.updateBeamOutStore(beamOutStoreV4, beamOut);
 
     #ok(beamOut.id)
   };
 
   // Create BeamOutModel with meetingId and meetingPassword
-  public func createBeamOutMeeting(amount : TokenAmount, tokenType : TokenType, recipient : Principal, durationNumDays : Nat32, meetingId : BeamOutMeetingString, meetingPassword : Text) : async Result<BeamOutId, ErrorCode> {
+  public func createBeamOutMeeting(amount : TokenAmount, tokenType : TokenType, recipient : Principal, durationNumMins : Nat32, meetingId : BeamOutMeetingString, meetingPassword : Text) : async Result<BeamOutId, ErrorCode> {
     // Generate 9 digits random id
     let opId = await NumberUtil.generateRandomDigits(9);
     let id = switch opId {
@@ -82,22 +82,22 @@ actor BeamOut {
     };
 
     // Create BeamOutModel
-    let beamOut = BeamOutType.createBeamOutMeeting(id, tokenType, amount, recipient, durationNumDays, meetingId, meetingPassword);
+    let beamOut = BeamOutType.createBeamOutMeeting(id, tokenType, amount, recipient, durationNumMins, meetingId, meetingPassword);
 
     // Check if there is duplicate id
-    let found = BeamOutStoreHelper.findBeamOutById(beamOutStoreV3, id);
+    let found = BeamOutStoreHelper.findBeamOutById(beamOutStoreV4, id);
     if (not Option.isNull(found)) {
       return #err(#duplicated_id("Duplicated id is found"))
     };
 
     // Persist BeamOutModel to store
-    beamOutStoreV3 := BeamOutStoreHelper.updateBeamOutStore(beamOutStoreV3, beamOut);
+    beamOutStoreV4 := BeamOutStoreHelper.updateBeamOutStore(beamOutStoreV4, beamOut);
 
     #ok(beamOut.id)
   };
 
-  public query func loadBeamOutById(id : BeamOutId) : async Result<BeamOutModelV3, ErrorCode> {
-    let beamOut = BeamOutStoreHelper.findBeamOutById(beamOutStoreV3, id);
+  public query func loadBeamOutById(id : BeamOutId) : async Result<BeamOutModelV4, ErrorCode> {
+    let beamOut = BeamOutStoreHelper.findBeamOutById(beamOutStoreV4, id);
     switch beamOut {
       case null return #err(#invalid_id("Beam out id not found"));
       case (?myBeamOut) return #ok(myBeamOut)
@@ -117,8 +117,8 @@ actor BeamOut {
 
   // Metrics - reportMetric in HTTP request: {totalURL, groupByDate: [{ numURL,  date}]}
   func reportMetric() : BeamOutMetric {
-    let totalURL : Nat = BeamOutStoreHelper.queryTotalBeamOut(beamOutStoreV3);
-    let groupByDate : [BeamOutDateMetric] = BeamOutStoreHelper.queryBeamOutDate(beamOutStoreV3);
+    let totalURL : Nat = BeamOutStoreHelper.queryTotalBeamOut(beamOutStoreV4);
+    let groupByDate : [BeamOutDateMetric] = BeamOutStoreHelper.queryBeamOutDate(beamOutStoreV4);
 
     {
       totalURL;
@@ -153,13 +153,13 @@ actor BeamOut {
   };
 
   system func postupgrade() {
-    // only upgrade if beamOutStoreV3 is empty
-    if (not Trie.isEmpty(beamOutStoreV3)) {
-      Debug.print("Skip migrating beamOutStore to beamOutStoreV3 as beamOutStoreV3 is not empty");
+    // only upgrade if beamOutStoreV4 is empty
+    if (not Trie.isEmpty(beamOutStoreV4)) {
+      Debug.print("Skip migrating beamOutStore to beamOutStoreV4 as beamOutStoreV4 is not empty");
       return
     };
 
-    beamOutStoreV3 := BeamOutStoreHelper.upgradeBeamOutStore(beamOutStore)
+    beamOutStoreV4 := BeamOutStoreHelper.upgradeBeamOutStore(beamOutStore)
   };
 
 }
