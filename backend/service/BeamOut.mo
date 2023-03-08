@@ -22,7 +22,7 @@ actor BeamOut {
   type BeamOutId = BeamOutType.BeamOutId;
   type TokenType = BeamOutType.TokenType;
   type TokenAmount = BeamOutType.TokenAmount;
-  type BeamOutModel = BeamOutType.BeamOutModel;
+  type BeamOutModelV2 = BeamOutType.BeamOutModelV2;
   type BeamOutStore = BeamOutType.BeamOutStore;
   type BeamOutStoreV2 = BeamOutType.BeamOutStoreV2;
   type BeamOutMetric = BeamOutType.BeamOutMetric;
@@ -93,7 +93,7 @@ actor BeamOut {
     #ok(beamOut.id)
   };
 
-  public query func loadBeamOutById(id : BeamOutId) : async Result<BeamOutModel, ErrorCode> {
+  public query func loadBeamOutById(id : BeamOutId) : async Result<BeamOutModelV2, ErrorCode> {
     let beamOut = BeamOutStoreHelper.findBeamOutById(beamOutStoreV2, id);
     switch beamOut {
       case null return #err(#invalid_id("Beam out id not found"));
