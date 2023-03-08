@@ -16,7 +16,9 @@ module BeamOutType {
   public type BeamOutId = Nat32;
   public type BeamOutStore = Trie.Trie<BeamOutId, BeamOutModel>;
   public type BeamOutStoreV2 = Trie.Trie<BeamOutId, BeamOutModelV2>;
+  public type BeamOutStoreV3 = Trie.Trie<BeamOutId, BeamOutModelV3>;
   public type BeamOutMeetingId = Nat32;
+  public type BeamOutMeetingString = Text;
 
   // e8s token format
   public type TokenAmount = Nat64;
@@ -34,12 +36,12 @@ module BeamOutType {
     #duplicated_id : Text
   };
 
-  public type BeamOutType = {
+  type BeamOutType = {
     #payment;
     #meeting : BeamOutMeetingModel
   };
 
-  public type BeamOutModelV2 = {
+  type BeamOutModelV2 = {
     id : BeamOutId;
     createdAt : Time;
     updatedAt : Time;
@@ -48,6 +50,27 @@ module BeamOutType {
     recipient : Principal;
     durationNumDays : Nat32;
     beamOutType : BeamOutType
+  };
+
+  public type BeamOutModelV3 = {
+    id : BeamOutId;
+    createdAt : Time;
+    updatedAt : Time;
+    tokenType : TokenType;
+    amount : TokenAmount;
+    recipient : Principal;
+    durationNumDays : Nat32;
+    beamOutType : BeamOutTypeV3
+  };
+
+  public type BeamOutTypeV3 = {
+    #payment;
+    #meeting : BeamOutMeetingModelV3
+  };
+
+  public type BeamOutMeetingModelV3 = {
+    meetingId : BeamOutMeetingString;
+    meetingPassword : Text
   };
 
   public type BeamOutModel = {
@@ -60,7 +83,7 @@ module BeamOutType {
     durationNumDays : Nat32
   };
 
-  public type BeamOutMeetingModel = {
+  type BeamOutMeetingModel = {
     meetingId : BeamOutMeetingId;
     meetingPassword : Text
   };
@@ -81,7 +104,7 @@ module BeamOutType {
     amount : TokenAmount,
     recipient : Principal,
     durationNumDays : Nat32
-  ) : BeamOutModelV2 {
+  ) : BeamOutModelV3 {
     let now = T.now();
     {
       id = id;
@@ -101,9 +124,9 @@ module BeamOutType {
     amount : TokenAmount,
     recipient : Principal,
     durationNumDays : Nat32,
-    meetingId : BeamOutMeetingId,
+    meetingId : BeamOutMeetingString,
     meetingPassword : Text
-  ) : BeamOutModelV2 {
+  ) : BeamOutModelV3 {
     let now = T.now();
     {
       id = id;

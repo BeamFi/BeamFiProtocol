@@ -10,17 +10,17 @@ import BeamOutType "./BeamOutType";
 module BeamOutStoreHelper {
 
   type BeamOutId = BeamOutType.BeamOutId;
-  type BeamOutModelV2 = BeamOutType.BeamOutModelV2;
-  type BeamOutStoreV2 = BeamOutType.BeamOutStoreV2;
+  type BeamOutModelV3 = BeamOutType.BeamOutModelV3;
+  type BeamOutStoreV3 = BeamOutType.BeamOutStoreV3;
   type BeamOutModel = BeamOutType.BeamOutModel;
   type BeamOutStore = BeamOutType.BeamOutStore;
   type BeamOutDateMetric = BeamOutType.BeamOutDateMetric;
 
-  public func findBeamOutById(beamOutStore : BeamOutStoreV2, id : BeamOutId) : ?BeamOutModelV2 {
-    return Trie.find<BeamOutId, BeamOutModelV2>(beamOutStore, BeamOutType.idKey(id), Nat32.equal)
+  public func findBeamOutById(beamOutStore : BeamOutStoreV3, id : BeamOutId) : ?BeamOutModelV3 {
+    return Trie.find<BeamOutId, BeamOutModelV3>(beamOutStore, BeamOutType.idKey(id), Nat32.equal)
   };
 
-  public func updateBeamOutStore(beamOutStore : BeamOutStoreV2, beamOut : BeamOutModelV2) : BeamOutStoreV2 {
+  public func updateBeamOutStore(beamOutStore : BeamOutStoreV3, beamOut : BeamOutModelV3) : BeamOutStoreV3 {
     let newStore = Trie.put(
       beamOutStore,
       BeamOutType.idKey(beamOut.id),
@@ -30,20 +30,20 @@ module BeamOutStoreHelper {
     return newStore
   };
 
-  public func queryTotalBeamOut(store : BeamOutStoreV2) : Nat {
+  public func queryTotalBeamOut(store : BeamOutStoreV3) : Nat {
     Trie.size(store)
   };
 
-  func convertBeamOutTrieToArray(store : BeamOutStoreV2) : [BeamOutModelV2] {
-    Trie.toArray<BeamOutId, BeamOutModelV2, BeamOutModelV2>(
+  func convertBeamOutTrieToArray(store : BeamOutStoreV3) : [BeamOutModelV3] {
+    Trie.toArray<BeamOutId, BeamOutModelV3, BeamOutModelV3>(
       store,
-      func(key, value) : BeamOutModelV2 {
+      func(key, value) : BeamOutModelV3 {
         value
       }
     )
   };
 
-  public func queryBeamOutDate(store : BeamOutStoreV2) : [BeamOutDateMetric] {
+  public func queryBeamOutDate(store : BeamOutStoreV3) : [BeamOutDateMetric] {
     var dateTrie : Trie.Trie<Text, Nat> = Trie.empty();
     let beamOutArray = convertBeamOutTrieToArray(store);
 
@@ -73,10 +73,10 @@ module BeamOutStoreHelper {
     Array.sort<BeamOutDateMetric>(result, sortByFunc)
   };
 
-  public func upgradeBeamOutStore(oldStore : BeamOutStore) : BeamOutStoreV2 {
-    Trie.mapFilter<BeamOutId, BeamOutModel, BeamOutModelV2>(
+  public func upgradeBeamOutStore(oldStore : BeamOutStore) : BeamOutStoreV3 {
+    Trie.mapFilter<BeamOutId, BeamOutModel, BeamOutModelV3>(
       oldStore,
-      func(beamOutId, old) : ?BeamOutModelV2 {
+      func(beamOutId, old) : ?BeamOutModelV3 {
         ?{
           id = old.id;
           createdAt = old.createdAt;
