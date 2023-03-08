@@ -1,35 +1,30 @@
-import Trie "mo:base/Trie";
-import Principal "mo:base/Principal";
-import R "mo:base/Result";
-import Cycles "mo:base/ExperimentalCycles";
-import Nat64 "mo:base/Nat64";
-import Nat32 "mo:base/Nat32";
-import Int "mo:base/Int";
-import T "mo:base/Time";
-import List "mo:base/List";
+import Ledger "canister:ledger";
+
+import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Error "mo:base/Error";
-import Blob "mo:base/Blob";
+import Cycles "mo:base/ExperimentalCycles";
+import Int "mo:base/Int";
+import List "mo:base/List";
+import Nat32 "mo:base/Nat32";
+import Nat64 "mo:base/Nat64";
+import Principal "mo:base/Principal";
+import R "mo:base/Result";
+import T "mo:base/Time";
+import Trie "mo:base/Trie";
 
-import Account "../model/ledger/Account";
-import EscrowType "../model/escrow/EscrowType";
+import BitcoinApi "../bitcoin/BitcoinApi";
+import BitcoinType "../bitcoin/BitcoinType";
+import BitcoinUtils "../bitcoin/BitcoinUtils";
+import BitcoinWallet "../bitcoin/BitcoinWallet";
+import Env "../config/Env";
 import BeamType "../model/beam/BeamType";
 import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
-
-// --- Bitcoin
-import BitcoinType "../bitcoin/BitcoinType";
-import BitcoinWallet "../bitcoin/BitcoinWallet";
-import BitcoinApi "../bitcoin/BitcoinApi";
-import BitcoinUtils "../bitcoin/BitcoinUtils";
-// ---
-
-import Guard "../utils/Guard";
-import Env "../config/Env";
-import Op "../utils/Operation";
+import EscrowType "../model/escrow/EscrowType";
+import Account "../model/ledger/Account";
 import Err "../utils/Error";
-
-// Canister
-import Ledger "canister:ledger";
+import Guard "../utils/Guard";
+import Op "../utils/Operation";
 
 actor BeamEscrow {
 
@@ -53,6 +48,7 @@ actor BeamEscrow {
 
   type Period = BeamType.Period;
   type BeamId = BeamType.BeamId;
+  type BeamRelationObjId = BeamType.BeamRelationObjId;
 
   type ErrorCode = Err.ErrorCode;
 
@@ -76,7 +72,8 @@ actor BeamEscrow {
   let require = Guard.require;
 
   let BeamActor = actor (Env.beamCanisterId) : actor {
-    createBeam : (EscrowId, Time, Period) -> async Result<BeamId, BeamType.ErrorCode>
+    createBeam : (EscrowId, Time, Period) -> async Result<BeamId, BeamType.ErrorCode>;
+    createRelationBeam : (EscrowId, Time, Period, BeamRelationObjId) -> async Result<BeamId, BeamType.ErrorCode>
   };
 
   // Create new EscrowContract with ICP token type and Beam payment type for use in Beam App
@@ -88,7 +85,7 @@ actor BeamEscrow {
     creatorPrincipal : Principal
   ) : async Result<EscrowId, ErrorCode> {
 
-    await privateCreateEscrow(
+    let createResult = await privateCreateEscrow(
       caller,
       escrowAmount,
       #beam,
@@ -96,7 +93,50 @@ actor BeamEscrow {
       dueDate,
       buyerPrincipal,
       creatorPrincipal
-    )
+    );
+
+    let escrowId = switch createResult {
+      case (#err content) return #err(content);
+      case (#ok id) id
+    };
+
+    let result = await BeamActor.createBeam(escrowId, dueDate, beamRate);
+    switch result {
+      case (#err content) #err(#escrow_beam_failed(BeamType.errorMesg(content)));
+      case (#ok _) #ok(escrowId)
+    }
+  };
+
+  // Create new EscrowContract with ICP token type and Beam payment type for use in Beam App
+  public shared ({ caller }) func createRelationBeamEscrow(
+    escrowAmount : TokenAmount,
+    blockIndex : BlockIndex,
+    dueDate : Time,
+    buyerPrincipal : Principal,
+    creatorPrincipal : Principal,
+    objId : BeamRelationObjId
+  ) : async Result<EscrowId, ErrorCode> {
+
+    let createResult = await privateCreateEscrow(
+      caller,
+      escrowAmount,
+      #beam,
+      blockIndex,
+      dueDate,
+      buyerPrincipal,
+      creatorPrincipal
+    );
+
+    let escrowId = switch createResult {
+      case (#err content) return #err(content);
+      case (#ok id) id
+    };
+
+    let result = await BeamActor.createRelationBeam(escrowId, dueDate, beamRate, objId);
+    switch result {
+      case (#err content) #err(#escrow_beam_failed(BeamType.errorMesg(content)));
+      case (#ok _) #ok(escrowId)
+    }
   };
 
   // Create new EscrowContract with ICP token type
@@ -162,21 +202,10 @@ actor BeamEscrow {
     escrowStore := EscrowStoreHelper.updateEscrowStore(escrowStore, escrowContract);
 
     // Add escrowId to beamEscrowPPStore for buyer and creator if the payment type is #beam
-    if (paymentType == #beam) {
-      beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, buyerPrincipal, escrowId);
-      beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, creatorPrincipal, escrowId)
-    };
+    beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, buyerPrincipal, escrowId);
+    beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, creatorPrincipal, escrowId);
 
     // --- Actor state changes commited ---
-
-    // Create Beam if paymentType is #beam
-    if (paymentType == #beam) {
-      let result = await BeamActor.createBeam(escrowId, dueDate, beamRate);
-      switch result {
-        case (#err content) return #err(#escrow_beam_failed(BeamType.errorMesg(content)));
-        case (#ok _)()
-      }
-    };
 
     #ok(escrowId)
   };
@@ -736,6 +765,7 @@ actor BeamEscrow {
       Principal
     );
     #createBeamEscrow : () -> (TokenAmount, BlockIndex, Time, Principal, Principal);
+    #createRelationBeamEscrow : () -> (TokenAmount, BlockIndex, Time, Principal, Principal, BeamRelationObjId);
     #buyerClaim : () -> (EscrowId, TokenType, AccountIdentifier);
     #creatorClaim : () -> (EscrowId, TokenType, AccountIdentifier);
     #creatorClaimByPrincipal : () -> (EscrowId, TokenType, Principal);
@@ -779,6 +809,11 @@ actor BeamEscrow {
         let (_, _, _, buyerPrinciapl, creatorPrinciapl) = n();
         not Guard.isAnonymous(caller) and not Guard.isAnonymous(buyerPrinciapl) and not Guard.isAnonymous(creatorPrinciapl)
       };
+      case (#createRelationBeamEscrow n) {
+        let (_, _, _, buyerPrinciapl, creatorPrinciapl, _) = n();
+        not Guard.isAnonymous(caller) and not Guard.isAnonymous(buyerPrinciapl) and not Guard.isAnonymous(creatorPrinciapl)
+      };
+
       case (#buyerClaim _) not Guard.isAnonymous(caller);
       case (#creatorClaim _) not Guard.isAnonymous(caller);
       case (#creatorClaimByPrincipal _) not Guard.isAnonymous(caller);
