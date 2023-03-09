@@ -337,7 +337,8 @@ actor Beam {
     #getCanisterMemoryInfo : () -> ();
     #getManager : () -> ();
     #healthCheck : () -> ();
-    #http_request : () -> HttpRequest
+    #http_request : () -> HttpRequest;
+    #http_request_update : () -> HttpRequest
   };
 
   system func inspect({ arg : Blob; caller : Principal; msg : MesgType }) : Bool {
