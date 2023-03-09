@@ -468,7 +468,7 @@ actor Beam {
   system func postupgrade() {
     // only upgrade if beamStoreV2 is empty
     if (not Trie.isEmpty(beamStoreV2)) {
-      Debug.print("Skip migrating beamStore to beamStoreV2 as beamStoreV2 is not empty");
+      Debug.print("Skipping migrating beamStore to beamStoreV2 as beamStoreV2 is not empty");
       return
     };
 
