@@ -80,7 +80,8 @@ module BeamType {
     startDate : Time;
     scheduledEndDate : Time;
     status : BeamStatus;
-    createdAt : Time
+    createdAt : Time;
+    beamType : BeamType
   };
 
   // {totalNumBeam, totalICPVolume, groupByDate: [{numBeam, icpVolume, date}]}
