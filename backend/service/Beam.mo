@@ -443,20 +443,24 @@ actor Beam {
                   case (?id) id
                 };
 
-                let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
-                let beamId = switch (beamIdOp) {
-                  case null {
-                    Debug.print("Beam Id not found");
-                    return Http.BadRequestWith("Beam Id not found")
-                  };
-                  case (?id) id
-                };
+                let beamId : Nat32 = 6;
 
-                let newStatus = switch (myEvent) {
-                  case "meeting.started" #active;
-                  case "meeting.ended" #paused;
-                  case _ #active
-                };
+                // let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
+                // let beamId = switch (beamIdOp) {
+                //   case null {
+                //     Debug.print("Beam Id not found");
+                //     return Http.BadRequestWith("Beam Id not found")
+                //   };
+                //   case (?id) id
+                // };
+
+                let newStatus = #active;
+
+                // let newStatus = switch (myEvent) {
+                //   case "meeting.started" #active;
+                //   case "meeting.ended" #paused;
+                //   case _ #active
+                // };
 
                 privateActionOnBeam(beamId, newStatus);
 
