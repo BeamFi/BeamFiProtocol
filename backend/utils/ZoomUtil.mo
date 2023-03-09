@@ -65,20 +65,20 @@ module ZoomUtil {
     HexUtil.encode(hash)
   };
 
-  public func extractEvent(jsonStr : Text) : ?Text {
+  public func extractEvent(jsonStr : Text, pos : Nat) : ?Text {
     switch (JSON.parse(jsonStr)) {
       case (null) return null;
       case (?v) {
         switch (v) {
           case (#Object(v)) {
-            if (v.size() != 3) return null;
-
-            switch (v[2]) {
+            if (v.size() <= pos) return null;
+            switch (v[pos]) {
               case (("event", #String(v))) {
                 return ?v
               };
               case (_) return null
             }
+
           };
           case (_) return null
         }
@@ -129,7 +129,7 @@ module ZoomUtil {
       case (_) return null
     };
 
-    let y = switch (w[0]) {
+    let y = switch (w[2]) {
       case (("payload", #Object(w))) w;
       case (_) return null
     };

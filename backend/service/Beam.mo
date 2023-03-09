@@ -408,32 +408,45 @@ actor Beam {
     switch (jsonStr) {
       case null Http.TextContent("Invalid string");
       case (?myStr) {
-        let event = ZoomUtil.extractEvent(myStr);
+        var event = ZoomUtil.extractEvent(myStr, 2);
+        if (event == null) {
+          event := ZoomUtil.extractEvent(myStr, 0)
+        };
 
         switch (event) {
           case null return Http.TextContent("No event found");
           case (?myEvent) {
+            Debug.print("Zoom Event: " # myEvent);
+
             switch (myEvent) {
               case "endpoint.url_validation" {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
                 return Http.JsonContent(jsonRes, false)
               };
               case ("meeting.started" or "meeting.ended") {
-                let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
-                if (not isAuthentic) {
-                  return Http.BadRequestWith("Invalid signature")
-                };
+                // let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
+                // if (not isAuthentic) {
+                //   return Http.BadRequestWith("Invalid signature")
+                // };
+
+                Debug.print("Zoom Meeting Event: " # myEvent);
 
                 // start Beam
                 let meetingIdOp = ZoomUtil.extractMeetingId(myStr);
                 let meetingId = switch (meetingIdOp) {
-                  case null return Http.BadRequestWith("Invalid meeting id");
+                  case null {
+                    Debug.print("Invalid meeting id");
+                    return Http.BadRequestWith("Invalid meeting id")
+                  };
                   case (?id) id
                 };
 
                 let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
                 let beamId = switch (beamIdOp) {
-                  case null return Http.BadRequestWith("Beam Id not found");
+                  case null {
+                    Debug.print("Beam Id not found");
+                    return Http.BadRequestWith("Beam Id not found")
+                  };
                   case (?id) id
                 };
 
@@ -444,6 +457,8 @@ actor Beam {
                 };
 
                 privateActionOnBeam(beamId, newStatus);
+
+                Debug.print("Event processed successfully");
 
                 return Http.TextContent("Event processed successfully")
               };
