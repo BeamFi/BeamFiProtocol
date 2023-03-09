@@ -375,6 +375,22 @@ actor Beam {
             processHealthRequest(queryParams)
           };
           case "/zoom" {
+            Http.TextContentUpgrade("success", true)
+          };
+          case _ Http.BadRequest()
+        }
+      }
+    }
+  };
+
+  public func http_request_update(req : HttpRequest) : async HttpResponse {
+    let parsedURL = Http.parseURL(req.url);
+
+    switch (parsedURL) {
+      case (#err(_)) Http.BadRequest();
+      case (#ok(endPoint, queryParams)) {
+        switch (endPoint) {
+          case "/zoom" {
             processZoomRequest(req)
           };
           case _ Http.BadRequest()
@@ -426,6 +442,7 @@ actor Beam {
                 return Http.JsonContent(jsonRes, false)
               };
               case ("meeting.started" or "meeting.ended") {
+                // TODO - Enable signature verification
                 // let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
                 // if (not isAuthentic) {
                 //   return Http.BadRequestWith("Invalid signature")
@@ -443,24 +460,20 @@ actor Beam {
                   case (?id) id
                 };
 
-                let beamId : Nat32 = 6;
+                let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
+                let beamId = switch (beamIdOp) {
+                  case null {
+                    Debug.print("Beam Id not found");
+                    return Http.BadRequestWith("Beam Id not found")
+                  };
+                  case (?id) id
+                };
 
-                // let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
-                // let beamId = switch (beamIdOp) {
-                //   case null {
-                //     Debug.print("Beam Id not found");
-                //     return Http.BadRequestWith("Beam Id not found")
-                //   };
-                //   case (?id) id
-                // };
-
-                let newStatus = #active;
-
-                // let newStatus = switch (myEvent) {
-                //   case "meeting.started" #active;
-                //   case "meeting.ended" #paused;
-                //   case _ #active
-                // };
+                let newStatus = switch (myEvent) {
+                  case "meeting.started" #active;
+                  case "meeting.ended" #paused;
+                  case _ #active
+                };
 
                 privateActionOnBeam(beamId, newStatus);
 
