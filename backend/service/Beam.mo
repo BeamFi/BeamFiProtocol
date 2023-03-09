@@ -413,6 +413,8 @@ actor Beam {
           event := ZoomUtil.extractEvent(myStr, 0)
         };
 
+        Debug.print(myStr);
+
         switch (event) {
           case null return Http.TextContent("No event found");
           case (?myEvent) {

@@ -118,30 +118,49 @@ module ZoomUtil {
     return null
   };
 
+  func extractObject(key : Text, obj : [(Text, JSON.JSON)]) : ?[(Text, JSON.JSON)] {
+    for (i in Iter.range(0, 20)) {
+      switch (obj[i]) {
+        case ((key, #Object(w))) {
+          return ?w
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
+
+  func extractString(key : Text, obj : [(Text, JSON.JSON)]) : ?Text {
+    for (i in Iter.range(0, 20)) {
+      switch (obj[i]) {
+        case ((key, #String(w))) {
+          return ?w
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
+
   public func extractMeetingId(jsonStr : Text) : ?Text {
-    let v = switch (JSON.parse(jsonStr)) {
-      case (null) return null;
-      case (?v) v
-    };
+    do ? {
+      let v = switch (JSON.parse(jsonStr)) {
+        case (null) return null;
+        case (?v) v
+      };
 
-    let w = switch (v) {
-      case (#Object(v)) v;
-      case (_) return null
-    };
+      let w = switch (v) {
+        case (#Object(v)) v;
+        case (_) return null
+      };
 
-    let y = switch (w[2]) {
-      case (("payload", #Object(w))) w;
-      case (_) return null
-    };
+      let y = extractObject("payload", w)!;
+      let z = extractObject("object", y)!;
+      let m = extractString("id", z)!;
 
-    let z = switch (y[1]) {
-      case (("object", #Object(y))) y;
-      case (_) return null
-    };
-
-    switch (z[0]) {
-      case (("id", #String(z))) ?z;
-      case (_) return null
+      m
     }
   }
 
