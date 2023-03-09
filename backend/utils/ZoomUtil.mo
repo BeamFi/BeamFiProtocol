@@ -17,14 +17,17 @@ module ZoomUtil {
   type HeaderField = Http.HeaderField;
   type Hex = HexUtil.Hex;
 
+  let ZoomHeaderSignature = "x-zm-signature";
+  let ZoomHeaderTimestamp = "x-zm-request-timestamp";
+
   public func verifySignature(jsonStr : JSONText, headers : [HeaderField]) : Bool {
-    let signatureOp = Http.findHeader(headers, "x-zm-signature");
+    let signatureOp = Http.findHeader(headers, ZoomHeaderSignature);
     let expSignature = switch (signatureOp) {
       case (null) { return false };
       case (?v) { v }
     };
 
-    let timestampOp = Http.findHeader(headers, "x-zm-request-timestamp");
+    let timestampOp = Http.findHeader(headers, ZoomHeaderTimestamp);
     let timestamp = switch (timestampOp) {
       case (null) { return false };
       case (?v) { v }
