@@ -66,101 +66,41 @@ module ZoomUtil {
   };
 
   public func extractEvent(jsonStr : Text, pos : Nat) : ?Text {
-    switch (JSON.parse(jsonStr)) {
-      case (null) return null;
-      case (?v) {
-        switch (v) {
-          case (#Object(v)) {
-            if (v.size() <= pos) return null;
-            switch (v[pos]) {
-              case (("event", #String(v))) {
-                return ?v
-              };
-              case (_) return null
-            }
-
-          };
-          case (_) return null
-        }
-      }
-    };
-
-    return null
-  };
-
-  public func extractPlainToken(jsonStr : Text) : ?Text {
-    switch (JSON.parse(jsonStr)) {
-      case (null) return null;
-      case (?v) {
-        switch (v) {
-          case (#Object(v)) {
-            if (v.size() < 1) return null;
-
-            switch (v[0]) {
-              case (("payload", #Object(v))) {
-                if (v.size() < 1) return null;
-
-                switch (v[0]) {
-                  case (("plainToken", #String(v))) {
-                    return ?v
-                  };
-                  case (_) return null
-                }
-              };
-              case (_) return null
-            }
-          };
-          case (_) return null
-        }
-      }
-    };
-
-    return null
-  };
-
-  func extractObject(key : Text, obj : [(Text, JSON.JSON)]) : ?[(Text, JSON.JSON)] {
-    for (i in Iter.range(0, 20)) {
-      switch (obj[i]) {
-        case ((key, #Object(w))) {
-          return ?w
-        };
-        case (_)()
-      }
-    };
-
-    return null
-  };
-
-  func extractString(key : Text, obj : [(Text, JSON.JSON)]) : ?Text {
-    for (i in Iter.range(0, 20)) {
-      switch (obj[i]) {
-        case ((key, #String(w))) {
-          return ?w
-        };
-        case (_)()
-      }
-    };
-
-    return null
-  };
-
-  public func extractMeetingId(jsonStr : Text) : ?Text {
     do ? {
-      let v = switch (JSON.parse(jsonStr)) {
-        case (null) return null;
-        case (?v) v
-      };
-
+      let v = JSON.parse(jsonStr)!;
       let w = switch (v) {
         case (#Object(v)) v;
         case (_) return null
       };
 
-      let y = extractObject("payload", w)!;
-      let z = extractObject("object", y)!;
-      let m = extractString("id", z)!;
+      JSONUtil.extractString("event", w)!
+    }
+  };
 
-      m
+  public func extractPlainToken(jsonStr : Text) : ?Text {
+    do ? {
+      let v = JSON.parse(jsonStr)!;
+      let w = switch (v) {
+        case (#Object(v)) v;
+        case (_) return null
+      };
+
+      let y = JSONUtil.extractObject("payload", w)!;
+      JSONUtil.extractString("plainToken", y)!
+    }
+  };
+
+  public func extractMeetingId(jsonStr : Text) : ?Text {
+    do ? {
+      let v = JSON.parse(jsonStr)!;
+      let w = switch (v) {
+        case (#Object(v)) v;
+        case (_) return null
+      };
+
+      let y = JSONUtil.extractObject("payload", w)!;
+      let z = JSONUtil.extractObject("object", y)!;
+      JSONUtil.extractString("id", z)!
     }
   }
 

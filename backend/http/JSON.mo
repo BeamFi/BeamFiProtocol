@@ -4,6 +4,7 @@ import List "mo:base/List";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
+import JSONParser "mo:JSON/JSON";
 
 module JSON {
 
@@ -75,6 +76,32 @@ module JSON {
   public func addKeyNat(key : Text, value : Nat, accumList : KeyValueList) : KeyValueList {
     let newKeyValue : KeyValueText = "\"" # key # "\": " # Nat.toText(value);
     List.push(newKeyValue, accumList)
-  }
+  };
+
+  public func extractObject(key : Text, obj : [(Text, JSONParser.JSON)]) : ?[(Text, JSONParser.JSON)] {
+    for (i in Iter.range(0, obj.size() - 1)) {
+      switch (obj[i]) {
+        case ((key, #Object(w))) {
+          return ?w
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
+
+  public func extractString(key : Text, obj : [(Text, JSONParser.JSON)]) : ?Text {
+    for (i in Iter.range(0, obj.size() - 1)) {
+      switch (obj[i]) {
+        case ((key, #String(w))) {
+          return ?w
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
 
 }
