@@ -36,7 +36,7 @@ module BeamType {
 
   public type ErrorCode = { #invalid_beam : Text; #beam_notfound : Text; #permission_denied : Text };
 
-  public type BeamRelationObjId = Nat32;
+  public type BeamRelationObjId = Text;
 
   public type BeamType = {
     #payment;
@@ -278,9 +278,7 @@ module BeamType {
   };
 
   public func idKey(id : BeamId) : Trie.Key<BeamId> { { key = id; hash = Text.hash(Nat32.toText(id)) } };
-  public func relIdKey(id : BeamRelationObjId) : Trie.Key<BeamRelationObjId> {
-    { key = id; hash = Text.hash(Nat32.toText(id)) }
-  };
+  public func relIdKey(id : BeamRelationObjId) : Trie.Key<BeamRelationObjId> { { key = id; hash = Text.hash(id) } };
 
   public func textKey(x : Text) : Trie.Key<Text> { { key = x; hash = Text.hash(x) } };
 

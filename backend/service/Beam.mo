@@ -431,13 +431,7 @@ actor Beam {
                   case (?id) id
                 };
 
-                let meetingIdNatOp = TextUtil.textToNat(meetingId);
-                let meetingIdNat = switch (meetingIdNatOp) {
-                  case null return Http.BadRequestWith("Invalid meeting id");
-                  case (?id) id
-                };
-
-                let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, Nat32.fromNat(meetingIdNat));
+                let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
                 let beamId = switch (beamIdOp) {
                   case null return Http.BadRequestWith("Beam Id not found");
                   case (?id) id

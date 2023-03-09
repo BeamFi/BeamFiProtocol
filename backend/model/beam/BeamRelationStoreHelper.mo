@@ -1,4 +1,5 @@
 import Nat32 "mo:base/Nat32";
+import Text "mo:base/Text";
 import Trie "mo:base/Trie";
 
 import EscrowType "../escrow/EscrowType";
@@ -11,14 +12,14 @@ module BeamRelationStoreHelper {
   type BeamId = BeamType.BeamId;
 
   public func findBeamIdByRelId(store : BeamRelationStore, objId : BeamRelationObjId) : ?BeamId {
-    return Trie.find<BeamRelationObjId, BeamId>(store, BeamType.relIdKey(objId), Nat32.equal)
+    return Trie.find<BeamRelationObjId, BeamId>(store, BeamType.relIdKey(objId), Text.equal)
   };
 
   public func updateBeamRelationStore(store : BeamRelationStore, beamId : BeamId, objId : BeamRelationObjId) : BeamRelationStore {
     let newStore = Trie.put(
       store,
       BeamType.relIdKey(objId),
-      Nat32.equal,
+      Text.equal,
       beamId
     ).0;
     return newStore

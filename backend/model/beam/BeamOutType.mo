@@ -17,7 +17,7 @@ module BeamOutType {
   public type BeamOutStore = Trie.Trie<BeamOutId, BeamOutModel>;
   public type BeamOutStoreV4 = Trie.Trie<BeamOutId, BeamOutModelV4>;
 
-  public type BeamOutMeetingId = Nat32;
+  type BeamOutMeetingId = Nat32;
   public type BeamOutMeetingString = Text;
 
   // e8s token format
