@@ -442,13 +442,11 @@ actor Beam {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
                 return Http.JsonContent(jsonRes, false)
               };
-              case ("meeting.started" or "meeting.ended") {
-                // TODO - Enable signature verification
-                // let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
-                // if (not isAuthentic) {
-                //   return Http.BadRequestWith("Invalid signature")
-                // };
-
+              case "meeting.started" {
+                let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
+                if (not isAuthentic) {
+                  return Http.BadRequestWith("Invalid signature")
+                };
                 Debug.print("Zoom Meeting Event: " # myEvent);
 
                 // start Beam
@@ -472,16 +470,10 @@ actor Beam {
                   case (?id) id
                 };
 
-                let newStatus = switch (myEvent) {
-                  case "meeting.started" #active;
-                  case "meeting.ended" #paused;
-                  case _ #active
-                };
-
+                let newStatus = #active;
                 Debug.print("beamId: " # Nat32.toText(beamId));
 
                 privateActionOnBeam(beamId, newStatus);
-
                 Debug.print("Event processed successfully");
 
                 return Http.TextContent("Event processed successfully")
