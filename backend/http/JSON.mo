@@ -1,3 +1,4 @@
+import Debug "mo:base/Debug";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
@@ -81,8 +82,10 @@ module JSON {
   public func extractObject(key : Text, obj : [(Text, JSONParser.JSON)]) : ?[(Text, JSONParser.JSON)] {
     for (i in Iter.range(0, obj.size() - 1)) {
       switch (obj[i]) {
-        case ((key, #Object(w))) {
-          return ?w
+        case ((jsonKey, #Object(w))) {
+          if (jsonKey == key) {
+            return ?w
+          }
         };
         case (_)()
       }
@@ -93,9 +96,14 @@ module JSON {
 
   public func extractString(key : Text, obj : [(Text, JSONParser.JSON)]) : ?Text {
     for (i in Iter.range(0, obj.size() - 1)) {
+      let (jsonKey, jsonValue) = obj[i];
+      Debug.print("json: " # Nat.toText(i) # jsonKey);
+
       switch (obj[i]) {
-        case ((key, #String(w))) {
-          return ?w
+        case ((jsonKey, #String(w))) {
+          if (jsonKey == key) {
+            return ?w
+          }
         };
         case (_)()
       }

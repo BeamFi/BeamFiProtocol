@@ -455,11 +455,13 @@ actor Beam {
                 let meetingIdOp = ZoomUtil.extractMeetingId(myStr);
                 let meetingId = switch (meetingIdOp) {
                   case null {
-                    Debug.print("Invalid meeting id");
-                    return Http.BadRequestWith("Invalid meeting id")
+                    Debug.print("Meeting id not found");
+                    return Http.BadRequestWith("Meeting Id not found")
                   };
                   case (?id) id
                 };
+
+                Debug.print("MeetingID: " # meetingId);
 
                 let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
                 let beamId = switch (beamIdOp) {
@@ -475,6 +477,8 @@ actor Beam {
                   case "meeting.ended" #paused;
                   case _ #active
                 };
+
+                Debug.print("beamId: " # Nat32.toText(beamId));
 
                 privateActionOnBeam(beamId, newStatus);
 
