@@ -31,7 +31,7 @@ module BeamType {
   public type EscrowBeamStore = Trie.Trie<EscrowId, BeamId>;
   public type BeamRelationStore = Trie.Trie<BeamRelationObjId, BeamId>;
 
-  public type BeamStatus = { #active; #paused; #completed };
+  public type BeamStatus = { #created; #active; #paused; #completed };
   public type BeamSortBy = { #lastProcessedDate };
 
   public type ErrorCode = { #invalid_beam : Text; #beam_notfound : Text; #permission_denied : Text };
@@ -121,7 +121,7 @@ module BeamType {
       scheduledEndDate = scheduledEndDate;
       actualEndDate = null;
       rate = rate;
-      status = #paused;
+      status = #created;
       lastProcessedDate = now;
       createdAt = now;
       updatedAt = now;
@@ -133,6 +133,8 @@ module BeamType {
 
   public func updateBeam(beam : BeamModelV2, processedDate : Time, status : BeamStatus) : BeamModelV2 {
     let now = T.now();
+    let orgDuration = beam.scheduledEndDate - beam.startDate;
+
     let actualEndDate = do {
       // set actualEndDate to now if the new status is #completed and different from original status
       if (status == #completed and status != beam.status) {
@@ -141,12 +143,28 @@ module BeamType {
         beam.actualEndDate
       }
     };
+    let newStartDate = do {
+      // set startDate to now if the new status is #active and original status is #created
+      if (status == #active and beam.status == #created) {
+        now
+      } else {
+        beam.startDate
+      }
+    };
+    let newScheduledEndDate = do {
+      // update scheduledEndDate based on startDate and duration if the new status is #active and original status is #created
+      if (status == #active and beam.status == #created) {
+        newStartDate + orgDuration
+      } else {
+        beam.scheduledEndDate
+      }
+    };
 
     {
       id = beam.id;
       escrowId = beam.escrowId;
-      startDate = beam.startDate;
-      scheduledEndDate = beam.scheduledEndDate;
+      startDate = newStartDate;
+      scheduledEndDate = newScheduledEndDate;
       actualEndDate = actualEndDate;
       rate = beam.rate;
       status = status;
@@ -160,7 +178,7 @@ module BeamType {
   public func undoBeam(currentBeam : BeamModelV2, updatedBeam : BeamModelV2, orgBeam : BeamModelV2) : BeamModelV2 {
     let now = T.now();
 
-    // undo status and actualEndDate if currentBeam.status != orgiginal status and the latest update is from my call
+    // undo status and actualEndDate if currentBeam.status != original status and the latest update is from my call
     let status = do {
       if (currentBeam.status != orgBeam.status and currentBeam.updatedAt == updatedBeam.updatedAt) {
         orgBeam.status
@@ -169,7 +187,7 @@ module BeamType {
       }
     };
 
-    // undo actualEndDate if currentBeam.actualEndDate != orgiginal actualEndDate and the latest update is from my call
+    // undo actualEndDate if currentBeam.actualEndDate != original actualEndDate and the latest update is from my call
     let actualEndDate = do {
       if (currentBeam.actualEndDate != orgBeam.actualEndDate and currentBeam.updatedAt == updatedBeam.updatedAt) {
         orgBeam.actualEndDate
@@ -178,11 +196,29 @@ module BeamType {
       }
     };
 
+    // undo actualStartDate if currentBeam.actualStartDate != original actualStartDate and the latest update is from my call
+    let startDate = do {
+      if (currentBeam.startDate != orgBeam.startDate and currentBeam.updatedAt == updatedBeam.updatedAt) {
+        orgBeam.startDate
+      } else {
+        currentBeam.startDate
+      }
+    };
+
+    // undo scheduledEndDate if currentBeam.scheduledEndDate != original scheduledEndDate and the latest update is from my call
+    let scheduledEndDate = do {
+      if (currentBeam.scheduledEndDate != orgBeam.scheduledEndDate and currentBeam.updatedAt == updatedBeam.updatedAt) {
+        orgBeam.scheduledEndDate
+      } else {
+        currentBeam.scheduledEndDate
+      }
+    };
+
     {
       id = currentBeam.id;
       escrowId = currentBeam.escrowId;
-      startDate = currentBeam.startDate;
-      scheduledEndDate = currentBeam.scheduledEndDate;
+      startDate = startDate;
+      scheduledEndDate = scheduledEndDate;
       actualEndDate = actualEndDate;
       rate = currentBeam.rate;
       status = status;
