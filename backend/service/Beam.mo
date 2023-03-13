@@ -430,13 +430,9 @@ actor Beam {
           event := ZoomUtil.extractEvent(myStr, 0)
         };
 
-        Debug.print(myStr);
-
         switch (event) {
           case null return Http.TextContent("No event found");
           case (?myEvent) {
-            Debug.print("Zoom Event: " # myEvent);
-
             switch (myEvent) {
               case "endpoint.url_validation" {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
@@ -447,7 +443,6 @@ actor Beam {
                 if (not isAuthentic) {
                   return Http.BadRequestWith("Invalid signature")
                 };
-                Debug.print("Zoom Meeting Event: " # myEvent);
 
                 // start Beam
                 let meetingIdOp = ZoomUtil.extractMeetingId(myStr);
@@ -459,8 +454,6 @@ actor Beam {
                   case (?id) id
                 };
 
-                Debug.print("MeetingID: " # meetingId);
-
                 let beamIdOp = BeamRelationStoreHelper.findBeamIdByRelId(beamRelationStore, meetingId);
                 let beamId = switch (beamIdOp) {
                   case null {
@@ -471,10 +464,7 @@ actor Beam {
                 };
 
                 let newStatus = #active;
-                Debug.print("beamId: " # Nat32.toText(beamId));
-
                 privateActionOnBeam(beamId, newStatus);
-                Debug.print("Event processed successfully");
 
                 return Http.TextContent("Event processed successfully")
               };
