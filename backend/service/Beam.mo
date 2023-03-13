@@ -166,6 +166,12 @@ actor Beam {
     let now = T.now();
     let updatedBeam = BeamType.updateBeam(beam, now, status);
 
+    // skip persist beam if status is #completed
+    if (updatedBeam.status == #completed) {
+      Debug.print("Cannot update status as beam is completed");
+      return
+    };
+
     // persist beam
     beamStoreV2 := BeamStoreHelper.updateBeamStore(beamStoreV2, updatedBeam)
   };
