@@ -26,6 +26,9 @@ module Env {
   // When deploying to the IC this should be `Testnet`.
   public let bitcoinNetwork = "#BITCOIN_NETWORK#";
 
+  // Zoom Secret Token
+  public let zoomSecretToken = "#ZOOM_SECRET_TOKEN#";
+
   public func getBitcoinNetwork() : BitcoinType.Network {
     switch bitcoinNetwork {
       case ("Testnet") return #Testnet;

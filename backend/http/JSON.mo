@@ -1,9 +1,11 @@
+import Debug "mo:base/Debug";
+import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
-import Nat32 "mo:base/Nat32";
 import Nat "mo:base/Nat";
+import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
-import Int "mo:base/Int";
+import JSONParser "mo:JSON/JSON";
 
 module JSON {
 
@@ -75,6 +77,39 @@ module JSON {
   public func addKeyNat(key : Text, value : Nat, accumList : KeyValueList) : KeyValueList {
     let newKeyValue : KeyValueText = "\"" # key # "\": " # Nat.toText(value);
     List.push(newKeyValue, accumList)
-  }
+  };
+
+  public func extractObject(key : Text, obj : [(Text, JSONParser.JSON)]) : ?[(Text, JSONParser.JSON)] {
+    for (i in Iter.range(0, obj.size() - 1)) {
+      switch (obj[i]) {
+        case ((jsonKey, #Object(w))) {
+          if (jsonKey == key) {
+            return ?w
+          }
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
+
+  public func extractString(key : Text, obj : [(Text, JSONParser.JSON)]) : ?Text {
+    for (i in Iter.range(0, obj.size() - 1)) {
+      let (jsonKey, jsonValue) = obj[i];
+      Debug.print("json: " # Nat.toText(i) # jsonKey);
+
+      switch (obj[i]) {
+        case ((jsonKey, #String(w))) {
+          if (jsonKey == key) {
+            return ?w
+          }
+        };
+        case (_)()
+      }
+    };
+
+    return null
+  };
 
 }

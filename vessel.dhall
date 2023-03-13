@@ -1,4 +1,4 @@
 {
-  dependencies = [ "matchers" ],
-  compiler = Some "0.6.29"
+  dependencies = [ "matchers", "crypto", "JSON" ],
+  compiler = Some "0.8.3"
 }

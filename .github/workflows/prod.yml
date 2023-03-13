@@ -12,11 +12,11 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16.13.0"
+          node-version: "16.19.1"
       - name: Install DFX
         run: echo y | sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
         env:
-          DFX_VERSION: 0.11.2
+          DFX_VERSION: 0.13.1
       - run: dfx start --clean --background
       - name: Download vessel package management
         run: curl -L -o /usr/local/bin/vessel https://github.com/dfinity/vessel/releases/download/v0.6.3/vessel-linux64
@@ -33,6 +33,7 @@ jobs:
           CLIENT_KEY: ${{ secrets.CLIENT_KEY_PROD }}
           MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID_PROD }}
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK_PROD }}
+          ZOOM_SECRET_TOKEN: ${{ secrets.ZOOM_SECRET_TOKEN }}
       - name: Deploy Ledger in local DFX server
         run: ./scripts/deploy-local-ledger.sh
       - name: Revert Ledger Candid to public for building with other canisters
@@ -53,13 +54,13 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16.13.0"
+          node-version: "16.19.1"
       - name: Setup canisters
         run: ./scripts/setup-prod.sh
       - name: Install DFX
         run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
         env:
-          DFX_VERSION: 0.11.2
+          DFX_VERSION: 0.13.1
       - run: dfx start --clean --background
       - name: Add DFX identity and wallets
         run: ./scripts/add-ic-identity.sh
@@ -79,6 +80,7 @@ jobs:
           BEAM_ESCROW_CANISTER_ID: ${{ secrets.BEAM_ESCROW_CANISTER_ID_PROD }}
           MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID_PROD }}
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK_PROD }}
+          ZOOM_SECRET_TOKEN: ${{ secrets.ZOOM_SECRET_TOKEN }}
       - name: Build and deploy backend canisters to Internet Computer network
         run: ./scripts/upgrade-canisters.sh
       - name: Stop DFX server

@@ -41,3 +41,6 @@ Test*.wasm
 
 # Firebase
 .firebase
+
+# DFX generated UI declarations 
+src/declarations/

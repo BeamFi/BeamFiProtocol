@@ -1,34 +1,35 @@
-import Trie "mo:base/Trie";
-import Nat32 "mo:base/Nat32";
 import Array "mo:base/Array";
-import List "mo:base/List";
 import Int "mo:base/Int";
-import Time "mo:base/Time";
+import List "mo:base/List";
+import Nat32 "mo:base/Nat32";
 import Text "mo:base/Text";
-
-import BeamType "../beam/BeamType";
-import EscrowType "../escrow/EscrowType";
+import Time "mo:base/Time";
+import Trie "mo:base/Trie";
 
 import DateTimeUtil "../../utils/DateTimeUtil";
+import BeamType "../beam/BeamType";
+import EscrowType "../escrow/EscrowType";
 
 module BeamStoreHelper {
 
   type BeamId = BeamType.BeamId;
   type BeamModel = BeamType.BeamModel;
+  type BeamModelV2 = BeamType.BeamModelV2;
   type BeamReadModel = BeamType.BeamReadModel;
   type BeamStore = BeamType.BeamStore;
+  type BeamStoreV2 = BeamType.BeamStoreV2;
   type EscrowBeamStore = BeamType.EscrowBeamStore;
   type BeamSortBy = BeamType.BeamSortBy;
   type BeamDateMetric = BeamType.BeamDateMetric;
 
   type EscrowId = EscrowType.EscrowId;
 
-  public func findBeamById(beamStore : BeamStore, id : BeamId) : ?BeamModel {
-    return Trie.find<BeamId, BeamModel>(beamStore, BeamType.idKey(id), Nat32.equal)
+  public func findBeamById(beamStore : BeamStoreV2, id : BeamId) : ?BeamModelV2 {
+    return Trie.find<BeamId, BeamModelV2>(beamStore, BeamType.idKey(id), Nat32.equal)
   };
 
   public func loadBeamReadModelByEscrowIds(
-    beamStore : BeamStore,
+    beamStore : BeamStoreV2,
     escrowBeamStore : EscrowBeamStore,
     idArray : [EscrowId]
   ) : [BeamReadModel] {
@@ -40,7 +41,7 @@ module BeamStoreHelper {
     )
   };
 
-  public func findBeamByEscrowId(beamStore : BeamStore, escrowBeamStore : EscrowBeamStore, id : EscrowId) : ?BeamModel {
+  public func findBeamByEscrowId(beamStore : BeamStoreV2, escrowBeamStore : EscrowBeamStore, id : EscrowId) : ?BeamModelV2 {
     let opBeamId = Trie.find<EscrowId, BeamId>(escrowBeamStore, BeamType.idKey(id), Nat32.equal);
 
     switch opBeamId {
@@ -49,7 +50,7 @@ module BeamStoreHelper {
     }
   };
 
-  public func updateBeamStore(beamStore : BeamStore, beam : BeamModel) : BeamStore {
+  public func updateBeamStore(beamStore : BeamStoreV2, beam : BeamModelV2) : BeamStoreV2 {
     let newStore = Trie.put(
       beamStore,
       BeamType.idKey(beam.id),
@@ -69,8 +70,8 @@ module BeamStoreHelper {
     return newStore
   };
 
-  public func filterActiveBeams(beamArray : [BeamModel]) : [BeamModel] {
-    return Array.filter<BeamModel>(
+  public func filterActiveBeams(beamArray : [BeamModelV2]) : [BeamModelV2] {
+    return Array.filter<BeamModelV2>(
       beamArray,
       func(beam) : Bool {
         beam.status == #active
@@ -78,41 +79,41 @@ module BeamStoreHelper {
     )
   };
 
-  public func orderBy(beamArray : [BeamModel], sortBy : BeamSortBy, topN : Nat) : [BeamModel] {
+  public func orderBy(beamArray : [BeamModelV2], sortBy : BeamSortBy, topN : Nat) : [BeamModelV2] {
     let sortByFunc = do {
       switch (sortBy) {
         case (#lastProcessedDate) BeamType.compareByLastProcessedDate
       }
     };
 
-    let sortedArray = Array.sort<BeamModel>(beamArray, sortByFunc);
+    let sortedArray = Array.sort<BeamModelV2>(beamArray, sortByFunc);
 
-    let sortedList = List.fromArray<BeamModel>(sortedArray);
+    let sortedList = List.fromArray<BeamModelV2>(sortedArray);
     if (List.isNil(sortedList)) {
       return []
     };
 
     // Take topN
-    let topList = List.take<BeamModel>(sortedList, topN);
+    let topList = List.take<BeamModelV2>(sortedList, topN);
 
     return List.toArray(topList)
   };
 
-  public func queryTotalBeam(store : BeamStore) : Nat {
+  public func queryTotalBeam(store : BeamStoreV2) : Nat {
     Trie.size(store)
   };
 
-  func convertBeamTrieToArray(store : BeamStore) : [BeamModel] {
-    Trie.toArray<BeamId, BeamModel, BeamModel>(
+  func convertBeamTrieToArray(store : BeamStoreV2) : [BeamModelV2] {
+    Trie.toArray<BeamId, BeamModelV2, BeamModelV2>(
       store,
-      func(key, value) : BeamModel {
+      func(key, value) : BeamModelV2 {
         value
       }
     )
   };
 
   // {numBeam, date}
-  public func queryBeamDate(store : BeamStore) : [BeamDateMetric] {
+  public func queryBeamDate(store : BeamStoreV2) : [BeamDateMetric] {
     var dateNumBeamTrie : Trie.Trie<Text, BeamDateMetric> = Trie.empty();
     let beamArray = convertBeamTrieToArray(store);
 
@@ -146,6 +147,27 @@ module BeamStoreHelper {
 
     let sortByFunc = BeamType.compareByDateString;
     Array.sort<BeamDateMetric>(result, sortByFunc)
+  };
+
+  public func upgradeBeamStore(oldStore : BeamStore) : BeamStoreV2 {
+    Trie.mapFilter<BeamId, BeamModel, BeamModelV2>(
+      oldStore,
+      func(beamId, old) : ?BeamModelV2 {
+        ?{
+          id = old.id;
+          escrowId = old.escrowId;
+          startDate = old.startDate;
+          scheduledEndDate = old.scheduledEndDate;
+          actualEndDate = old.actualEndDate;
+          rate = old.rate;
+          status = old.status;
+          lastProcessedDate = old.lastProcessedDate;
+          createdAt = old.createdAt;
+          updatedAt = old.updatedAt;
+          beamType = #payment
+        }
+      }
+    )
   }
 
 }

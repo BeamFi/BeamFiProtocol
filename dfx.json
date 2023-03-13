@@ -24,8 +24,7 @@
         "id": {
           "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }
-      },
-      "build": []
+      }
     }
   },
   "defaults": {
@@ -39,7 +38,6 @@
     },
     "build": { "packtool": "vessel sources" }
   },
-  "dfx": "0.11.2",
-  "networks": { "local": { "bind": "127.0.0.1:8000", "type": "ephemeral" } },
+  "dfx": "0.13.1",
   "version": 1
 }

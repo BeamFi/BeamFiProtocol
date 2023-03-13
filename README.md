@@ -3,7 +3,7 @@
 BeamFi Protocol is a realtime money streaming protocol.
 
 See [BeamFi Pitch Deck](https://pitch.com/public/24972b6a-11d1-4690-8215-a2b44767d68a) for its vision.  
-See [BeamFi Payment Protocol](https://devpost.com/software/beam-payment-protocol-by-content-fly) in Supernova Hackathorn 2022. Top 7 submissions in DeFi. 
+See [BeamFi Payment Protocol](https://devpost.com/software/beam-payment-protocol-by-content-fly) in Supernova Hackathorn 2022. Top 7 submissions in DeFi.
 
 # Folder Structure
 
@@ -51,7 +51,7 @@ https://internetcomputer.org/docs/current/developer-docs/quickstart/local-quicks
 
 ## Dev Environment Setup
 
-- Install NodeJS 16.13 or if you have NVM:
+- Install NodeJS 16.19.1 or if you have NVM:
 
 ```
 > nvm use
@@ -62,16 +62,30 @@ https://internetcomputer.org/docs/current/developer-docs/quickstart/local-quicks
 Install Extensions: Prettier, Motoko
 
 - DFX
-  Install version 0.11.2 DFX
+  Install version 0.13.1 DFX
 
 ```
-> DFX_VERSION=0.11.2
+> DFX_VERSION=0.13.1
 > sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
 ```
 
 - Vessel - Motoko Package Management Tools  
   Follow the instructions from https://github.com/dfinity/vessel to download and put the binary in your PATH e.g /usr/local/bin .
   Vessel is used to install "matchers" - a Motoko testing library
+
+## Setup local IC network
+
+Create a file network.json under ~/.config/dfx/ and add the following content to have local replicas running on port 8000
+
+```
+> touch ~/config/dfx/networks.json
+```
+
+Network config
+
+```
+{ "local": { "bind": "127.0.0.1:8000", "type": "ephemeral" } }
+```
 
 ## Run local IC replicas
 
@@ -196,11 +210,11 @@ Be aware that the root canister_ids.json stores the canister ids deployed to IC 
 ## Update BeamFi app to use local BeamFi canisters
 
 - copy .dfx/local/canisters_id.json to your local beamapp Git repo .dfx/local/canisters_id.json
-- switch to beamapp Git repo, copy env.iclocal to env.development
+- switch to beamapp Git repo, copy .env.iclocal to .env.development
 - run next server
 
 ```
-> cp env.iclocal env.development
+> cp .env.iclocal .env.development
 > npm run dev
 ```
 
@@ -338,6 +352,12 @@ IC Bitcoin is configured in dfx.json. It's disabled currently.
 
 ```
 
+- Run Bitcoin local daemon
+
+```
+./bin/bitcoind -conf=$(pwd)/bitcoin.conf -datadir=$(pwd)/data --port=18444
+```
+
 # Setting up Github Action CI / CD
 
 Get the string using commands below then put it into Github Secrets.
@@ -391,9 +411,14 @@ Change to:
 
 # Author
 
-Henry Chan  
-henry@beamfi.app  
+Henry Chan
+henry@beamfi.app
 Twitter: @kinwo
 
 # License
+
 See the [License](License) file for license rights and limitations (MIT).
+
+```
+
+```
