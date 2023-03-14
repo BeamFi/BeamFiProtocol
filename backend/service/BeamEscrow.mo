@@ -8,6 +8,7 @@ import Int "mo:base/Int";
 import List "mo:base/List";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
+import P "mo:base/Prelude";
 import Principal "mo:base/Principal";
 import R "mo:base/Result";
 import T "mo:base/Time";
@@ -201,7 +202,7 @@ actor BeamEscrow {
     // Add to escrowStore
     escrowStore := EscrowStoreHelper.updateEscrowStore(escrowStore, escrowContract);
 
-    // Add escrowId to beamEscrowPPStore for buyer and creator if the payment type is #beam
+    // Add escrowId to beamEscrowPPStore for buyer and creator
     beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, buyerPrincipal, escrowId);
     beamEscrowPPStore := EscrowStoreHelper.addEscrowToBeamEscrowPPStore(beamEscrowPPStore, creatorPrincipal, escrowId);
 
@@ -700,6 +701,10 @@ actor BeamEscrow {
       case (#btc) {
         let amount = await getBitcoinBalance();
         { e8s = amount }
+      };
+      case (#xtc) {
+        // TODO - implement XTC balance check
+        P.unreachable()
       }
     }
   };

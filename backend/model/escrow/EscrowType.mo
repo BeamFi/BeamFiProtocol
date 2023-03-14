@@ -1,20 +1,19 @@
+import Ledger "canister:ledger";
+
+import Float "mo:base/Float";
+import Hash "mo:base/Hash";
+import Int64 "mo:base/Int64";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
-import Int64 "mo:base/Int64";
-import Float "mo:base/Float";
-import Principal "mo:base/Principal";
-import Trie "mo:base/Trie";
-import Text "mo:base/Text";
-import Hash "mo:base/Hash";
 import Option "mo:base/Option";
-import T "mo:base/Time";
 import Order "mo:base/Order";
+import Principal "mo:base/Principal";
+import Text "mo:base/Text";
+import T "mo:base/Time";
+import Trie "mo:base/Trie";
 
-import Account "../ledger/Account";
 import Env "../../config/Env";
-
-// Canister
-import Ledger "canister:ledger";
+import Account "../ledger/Account";
 
 module EscrowType {
 
@@ -26,7 +25,7 @@ module EscrowType {
 
   // e8s token format
   public type TokenAmount = Nat64;
-  public type TokenType = { #icp; #btc };
+  public type TokenType = { #icp; #btc; #xtc };
   public type BlockIndex = Nat64;
 
   type Block = Ledger.Block;
