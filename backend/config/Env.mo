@@ -21,6 +21,9 @@ module Env {
   // Beam Canister ID
   public let beamCanisterId = "#BEAM_CANISTER_ID#";
 
+  // XTC Canister ID
+  public let xtcCanisterId = "aanaa-xaaaa-aaaah-aaeiq-cai";
+
   // The Bitcoin network to connect to.
   // When developing locally this should be `Regtest`.
   // When deploying to the IC this should be `Testnet`.
