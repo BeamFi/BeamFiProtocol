@@ -25,7 +25,11 @@ module XTC {
     #ErrorTo;
     #Other;
     #BlockUsed;
-    #AmountTooSmall
+    #AmountTooSmall;
+    #FetchRateFailed;
+    #NotifyDfxFailed;
+    #UnexpectedCyclesResponse;
+    #InsufficientXTCFee
   };
 
   public type TxReceipt = Result<Nat, TxError>;
