@@ -25,11 +25,11 @@ module XTC {
     let result = await XTCActor.Actor.transferErc20(to, Nat64.toNat(amount));
 
     switch (result) {
-      case (#ok(txId)) {
+      case (#Ok(txId)) {
         let mesg = "Paid to " # debug_show to # " in transaction " # debug_show txId;
         #ok(mesg)
       };
-      case (#err(other)) {
+      case (#Err(other)) {
         #err(#escrow_token_transfer_failed("Unexpected error: " # debug_show other))
       }
     }
