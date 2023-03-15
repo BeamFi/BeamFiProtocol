@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import ICPLedger "canister:ledger";
 
 import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
@@ -20,9 +20,13 @@ import BitcoinUtils "../bitcoin/BitcoinUtils";
 import BitcoinWallet "../bitcoin/BitcoinWallet";
 import Env "../config/Env";
 import BeamType "../model/beam/BeamType";
+import BTC "../model/escrow/BTC";
 import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
 import EscrowType "../model/escrow/EscrowType";
-import Account "../model/ledger/Account";
+import ICP "../model/escrow/ICP";
+import XTC "../model/escrow/XTC";
+import Account "../model/icp/Account";
+import XTCActor "../remote/xtc/XTC";
 import Err "../utils/Error";
 import Guard "../utils/Guard";
 import Op "../utils/Operation";
@@ -68,8 +72,6 @@ actor BeamEscrow {
   // Beam rate in secs
   let beamRate : Period = 2;
 
-  // ICP
-  let icpTransferFee : Nat64 = 10_000;
   let require = Guard.require;
 
   let BeamActor = actor (Env.beamCanisterId) : actor {
@@ -77,9 +79,10 @@ actor BeamEscrow {
     createRelationBeam : (EscrowId, Time, Period, BeamRelationObjId) -> async Result<BeamId, BeamType.ErrorCode>
   };
 
-  // Create new EscrowContract with ICP token type and Beam payment type for use in Beam App
+  // Create new EscrowContract with token type and Beam payment type for use in Beam App
   public shared ({ caller }) func createBeamEscrow(
     escrowAmount : TokenAmount,
+    tokenType : TokenType,
     blockIndex : BlockIndex,
     dueDate : Time,
     buyerPrincipal : Principal,
@@ -89,6 +92,7 @@ actor BeamEscrow {
     let createResult = await privateCreateEscrow(
       caller,
       escrowAmount,
+      tokenType,
       #beam,
       blockIndex,
       dueDate,
@@ -108,9 +112,10 @@ actor BeamEscrow {
     }
   };
 
-  // Create new EscrowContract with ICP token type and Beam payment type for use in Beam App
+  // Create new EscrowContract with token type and Beam payment type for use in Beam App
   public shared ({ caller }) func createRelationBeamEscrow(
     escrowAmount : TokenAmount,
+    tokenType : TokenType,
     blockIndex : BlockIndex,
     dueDate : Time,
     buyerPrincipal : Principal,
@@ -121,6 +126,7 @@ actor BeamEscrow {
     let createResult = await privateCreateEscrow(
       caller,
       escrowAmount,
+      tokenType,
       #beam,
       blockIndex,
       dueDate,
@@ -140,10 +146,11 @@ actor BeamEscrow {
     }
   };
 
-  // Create new EscrowContract with ICP token type
+  // Create new EscrowContract with token type
   func privateCreateEscrow(
     caller : Principal,
     escrowAmount : TokenAmount,
+    tokenType : TokenType,
     paymentType : EscrowPaymentType,
     blockIndex : BlockIndex,
     dueDate : Time,
@@ -151,45 +158,37 @@ actor BeamEscrow {
     creatorPrincipal : Principal
   ) : async Result<EscrowId, ErrorCode> {
 
-    // Verify BlockIndex with buyerPrincipal and TokenAmount transferred to this canister
-    let response = await Ledger.query_blocks({ start = blockIndex; length = 1 });
-    let blocksList = List.fromArray(response.blocks);
-
-    // Return error if it is empty blocks, operation.
-    if (List.isNil(blocksList)) {
-      return #err(#escrow_payment_not_found("The block specified is not found"))
+    // Verify BlockIndex with TokenAmount transferred to this canister
+    let result = switch (tokenType) {
+      case (#icp) await ICP.verifyBlock(blockIndex, escrowAmount);
+      case (#xtc) await XTC.verifyBlock(blockIndex, escrowAmount);
+      case (_) return #err(#escrow_contract_verification_failed("The token type is not supported"))
     };
 
-    let blockOp = List.get(blocksList, 0);
-    let block = switch blockOp {
-      case null return #err(#escrow_payment_not_found("The block specified is not found"));
-      case (?myBlock) myBlock
+    switch result {
+      case (#err content) return #err(content);
+      case (#ok _)()
     };
 
-    let isVerified = EscrowType.verifyBlock(block, escrowAmount);
-    if (not isVerified) {
-      return #err(#escrow_contract_verification_failed("The block is present but it fails verification"))
-    };
-
-    // Verify All Contracts ICP + the addition escrowAmount <= actual ICP tokens owned by this canister, requires await
-    let canisterICPTokens = await myCanisterBalance(#icp);
-    let sumAllEscrowTokenAmount = EscrowStoreHelper.sumAllEscrowTokens(escrowStore, #icp);
+    // Verify All Contracts tokens + the addition escrowAmount <= actual tokens owned by this canister, requires await
+    let canisterTokens = await myCanisterBalance(tokenType);
+    let sumAllEscrowTokenAmount = EscrowStoreHelper.sumAllEscrowTokens(escrowStore, tokenType);
     let isMatched = EscrowType.verifyAllEscrowMatchedActual(
       sumAllEscrowTokenAmount + escrowAmount,
-      canisterICPTokens.e8s
+      canisterTokens.e8s
     );
     if (not isMatched) {
-      return #err(#escrow_token_owned_not_matched("The actual ICP owned by the canister is smaller than the total escrow amount of all contracts"))
+      return #err(#escrow_token_owned_not_matched("The actual tokens owned by the canister is smaller than the total escrow amount of all contracts"))
     };
 
     // --- Atomicity starts ---
     let escrowId = nextEscrowId;
     nextEscrowId += 1;
 
-    // Create new EscrowContract with #icp token type
+    // Create new EscrowContract with token type
     let escrowContract = EscrowType.createEscrowContract(
       escrowId,
-      #icp,
+      tokenType,
       escrowAmount,
       buyerPrincipal,
       creatorPrincipal,
@@ -264,7 +263,7 @@ actor BeamEscrow {
       case (#ok content) #ok(content);
       case (#err content) {
         // Rollback if transfer fails
-        // load the escrow again due to reentrancy, the loaded escrowContract above may have changed after transferICPToken
+        // load the escrow again due to reentrancy, the loaded escrowContract above may have changed after transfer token
         let opEscrow = EscrowStoreHelper.findEscrowContractById(escrowStore, escrowId);
         let currentEscrowContract = switch opEscrow {
           case null return #err(#escrow_contract_not_found("Escrow Contract not found"));
@@ -283,9 +282,9 @@ actor BeamEscrow {
     // --- Actor state changes commited ---
   };
 
-  // Creator can claim ICP tokens to the default account wallet of their princiapl
+  // Creator can claim tokens to the default account wallet of their princiapl
   // Follow Checks-Effects-Interactions-Rollback pattern
-  // Security Audit: Reentrancy check before / after transferICPToken, multiple parties of the same user can call claim while await transfer is processing
+  // Security Audit: Reentrancy check before / after transfer token, multiple parties of the same user can call claim while await transfer is processing
   public shared ({ caller }) func creatorClaimByPrincipal(
     escrowId : EscrowId,
     tokenType : TokenType,
@@ -304,26 +303,36 @@ actor BeamEscrow {
       return #err(#escrow_invalid_accountid("accountId for claiming is invalid"))
     };
 
+    // validate tokenType
+    if (tokenType != #icp and tokenType != #xtc) {
+      return #err(#escrow_invalid_token_type("Only support ICP or XRC for claiming with creatorClaimByPrincipal"))
+    };
+
     // ----- Effects
-    let { amountMinusFee; toBeClaimed } = creatorClaimEffect(escrowContract, ?accountId, icpTransferFee);
+    let { amountMinusFee; toBeClaimed } = creatorClaimEffect(escrowContract, ?accountId, EscrowType.tokenTransferFee(tokenType));
     if (toBeClaimed == 0) {
       return #ok("Nothing to claim")
     };
 
-    // ----- Interactions for ICP
+    // ----- Interactions for token
     // send tokens to the AccountIdentifier based on the caller type
     let memo = Nat64.fromNat(Nat32.toNat(escrowId));
-    let res = await transferICPToken(amountMinusFee, icpTransferFee, memo, accountId);
-    // Security - note another party can call claim here while transferICPToken is processing
+    let res = switch tokenType {
+      case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
+      case (#xtc) await XTC.transfer(amountMinusFee, creatorPrinciapl);
+      case _ P.unreachable()
+    };
+
+    // Security - note another party can call claim here while transfer token is processing
 
     // ----- Rollback or Success
     creatorClaimRollback(res, escrowId, toBeClaimed)
   };
 
-  // Creator can claim ICP tokens to their wallet
+  // Creator can claim tokens to their wallet
   // Follow Checks-Effects-Interactions-Rollback pattern
-  // Security Audit: Reentrancy check before / after transferICPToken, multiple parties of the same user can call claim while await transfer is processing
-  public shared ({ caller }) func creatorClaim(
+  // Security Audit: Reentrancy check before / after transfer token, multiple parties of the same user can call claim while await transfer is processing
+  public shared ({ caller }) func creatorClaimByAccountId(
     escrowId : EscrowId,
     tokenType : TokenType,
     accountId : AccountIdentifier
@@ -339,54 +348,61 @@ actor BeamEscrow {
       return #err(#escrow_invalid_accountid("accountId for claiming is invalid"))
     };
 
+    // validate tokenType
+    if (tokenType != #icp) {
+      return #err(#escrow_invalid_token_type("Only support ICP for claiming with creatorClaimByAccountId"))
+    };
+
     // ----- Effects
-    let { amountMinusFee; toBeClaimed } = creatorClaimEffect(escrowContract, ?accountId, icpTransferFee);
+    let { amountMinusFee; toBeClaimed } = creatorClaimEffect(escrowContract, ?accountId, EscrowType.tokenTransferFee(tokenType));
     if (toBeClaimed == 0) {
       return #ok("Nothing to claim")
     };
 
-    // ----- Interactions for ICP
+    // ----- Interactions for token
     // send tokens to the AccountIdentifier based on the caller type
     let memo = Nat64.fromNat(Nat32.toNat(escrowId));
-    let res = await transferICPToken(amountMinusFee, icpTransferFee, memo, accountId);
-    // Security - note another party can call claim here while transferICPToken is processing
+    let res = switch tokenType {
+      case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
+      case _ P.unreachable()
+    };
+    // Security - note another party can call claim here while transfer token is processing
 
     // ----- Rollback or Success
     creatorClaimRollback(res, escrowId, toBeClaimed)
   };
 
-  // Creator can claim ICP tokens to their wallet
+  // Creator can claim tokens to their wallet
   // Follow Checks-Effects-Interactions-Rollback pattern
-  // Security Audit: Reentrancy check before / after transferBTCToken, multiple parties of the same user can call claim while await transfer is processing
+  // Security Audit: Reentrancy check before / after transfer Token, multiple parties of the same user can call claim while await transfer is processing
   public shared ({ caller }) func creatorClaimBTC(
     escrowId : EscrowId,
-    tokenType : TokenType,
     btcAddress : BitcoinAddress
   ) : async Result<Text, EscrowType.ErrorCode> {
-    let checkResult = creatorClaimCheck(caller, escrowId, tokenType);
+    let checkResult = creatorClaimCheck(caller, escrowId, #btc);
     let escrowContract = switch checkResult {
       case (#ok myEscrow) myEscrow;
       case (#err content) return #err(content)
     };
 
     // ----- Effects
-    let btcTransferFee = await calcBTCFees(btcAddress, escrowContract.creatorClaimable);
+    let btcTransferFee = await BTC.calcBTCFees(btcAddress, escrowContract.creatorClaimable);
     let { amountMinusFee; toBeClaimed } = creatorClaimEffect(escrowContract, null, Nat64.fromNat(btcTransferFee));
     if (toBeClaimed == 0) {
       return #ok("Nothing to claim")
     };
 
     // ----- Interactions for BTC
-    let res = await transferBTCToken(btcAddress, amountMinusFee, btcTransferFee);
+    let res = await BTC.transferBTCToken(btcAddress, amountMinusFee, btcTransferFee);
     // Security - note another party can call claim here while transferBTCToken is processing
 
     // ----- Rollback or Success
     creatorClaimRollback(res, escrowId, toBeClaimed)
   };
 
-  // Buyer can claim ICP tokens to their wallet when dispute resolution results in buyer funds released
+  // Buyer can claim tokens to their wallet when dispute resolution results in buyer funds released
   // Follow Checks-Effects-Interactions-Rollback pattern
-  // Security Audit: Reentrancy check before / after transferICPToken, multiple parties of the same user can call claim while await transfer is processing
+  // Security Audit: Reentrancy check before / after transfer Token, multiple parties of the same user can call claim while await transfer is processing
   public shared ({ caller }) func buyerClaim(escrowId : EscrowId, tokenType : TokenType, accountId : AccountIdentifier) : async Result<Text, EscrowType.ErrorCode> {
     // ----- Checks
     // load the escrow using escrowId
@@ -411,11 +427,15 @@ actor BeamEscrow {
       return #err(#escrow_invalid_token_type("tokenType for claiming is not matched with the EscrowContract"))
     };
 
+    if (tokenType != #icp) {
+      return #err(#escrow_invalid_token_type("Only support ICP for claiming with buyerClaim"))
+    };
+
     // ----- Effects
 
     // --- Atomicity starts ---
     let toBeClaimed = escrowContract.buyerClaimable;
-    let amountMinusFee = toBeClaimed - icpTransferFee;
+    let amountMinusFee = toBeClaimed - EscrowType.tokenTransferFee(tokenType);
 
     if (toBeClaimed == 0) {
       return #ok("Nothing to claim")
@@ -437,15 +457,18 @@ actor BeamEscrow {
     // ----- Interactions
     // send tokens to the AccountIdentifier based on the caller type
     let memo = Nat64.fromNat(Nat32.toNat(escrowId));
-    let res = await transferICPToken(amountMinusFee, icpTransferFee, memo, accountId);
-    // Security - note another party can call claim here while transferICPToken is processing
+    let res = switch tokenType {
+      case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
+      case _ P.unreachable()
+    };
+    // Security - note another party can call claim here while transfer token is processing
 
     // ----- Rollback or Success
     switch res {
       case (#ok _) #ok("success");
       case (#err content) {
         // Rollback if transfer fails
-        // load the escrow again due to reentrancy, the loaded escrowContract above may have changed after transferICPToken
+        // load the escrow again due to reentrancy, the loaded escrowContract above may have changed after transfer token
         let opEscrow = EscrowStoreHelper.findEscrowContractById(escrowStore, escrowId);
         let currentEscrowContract = switch opEscrow {
           case null return #err(#escrow_contract_not_found("Escrow Contract not found for the escrowId"));
@@ -462,32 +485,6 @@ actor BeamEscrow {
       }
     };
     // --- Actor state changes commited ---
-  };
-
-  func transferICPToken(transferAmount : TokenAmount, fee : TokenAmount, memo : Nat64, toAccountId : AccountIdentifier) : async Result<Text, EscrowType.ErrorCode> {
-    let now = T.now();
-
-    let res = await Ledger.transfer({
-      memo = memo;
-      from_subaccount = null;
-      to = toAccountId;
-      amount = { e8s = transferAmount };
-      fee = { e8s = fee };
-      created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(now)) }
-    });
-
-    switch (res) {
-      case (#Ok(blockIndex)) {
-        let mesg = "Paid to " # debug_show toAccountId # " in block " # debug_show blockIndex;
-        #ok(mesg)
-      };
-      case (#Err(#InsufficientFunds { balance })) {
-        #err(#escrow_token_transfer_failed("Top me up! The balance is only " # debug_show balance # " e8s"))
-      };
-      case (#Err(other)) {
-        #err(#escrow_token_transfer_failed("Unexpected error: " # debug_show other))
-      }
-    }
   };
 
   // Public func - Update escrow contract allocation percentage for escrow, creator and buyer
@@ -659,52 +656,30 @@ actor BeamEscrow {
     // --- Actor state changes commited ---
     #ok(escrowId)
   };
+  // ---- End of Bitcoin
 
-  /// Sends the given amount of bitcoin from this canister to the given address.
-  /// Returns the transaction ID.
-  func transferBTCToken(destinationAddress : Text, amount : Satoshi, totalFee : Nat) : async Result<Text, EscrowType.ErrorCode> {
-    try {
-      let network = Env.getBitcoinNetwork();
-      let keyName = BitcoinType.getBitcoinKeyName(network);
-      let transactionBytes = await BitcoinWallet.send(
-        network,
-        BitcoinType.DERIVATION_PATH,
-        keyName,
-        destinationAddress,
-        amount,
-        totalFee
-      );
-      let transactionId = BitcoinUtils.bytesToText(transactionBytes);
-
-      #ok(transactionId)
-    } catch (error) {
-      #err(#escrow_bitcoin_create_transfer_failed("Unknown error is caught in transferBTCToken: " # Error.message(error)))
-    }
+  // ---- XTC
+  func getXTCBalance() : async Nat {
+    await XTCActor.Actor.balanceOf(Principal.fromActor(BeamEscrow))
   };
-
-  func calcBTCFees(destinationAddress : Text, amount : Satoshi) : async Nat {
-    let network = Env.getBitcoinNetwork();
-    let keyName = BitcoinType.getBitcoinKeyName(network);
-    await BitcoinWallet.calc_fees(network, BitcoinType.DERIVATION_PATH, keyName, destinationAddress, amount)
-  };
-  // ----
+  // ---- End of XTC
 
   // Returns current balance on the default account of this canister, only admin manager can access
-  public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Ledger.Tokens {
+  public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async ICPLedger.Tokens {
     requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
-  func myCanisterBalance(tokenType : TokenType) : async Ledger.Tokens {
+  func myCanisterBalance(tokenType : TokenType) : async ICPLedger.Tokens {
     switch tokenType {
-      case (#icp) await Ledger.account_balance({ account = myAccountId() });
+      case (#icp) await ICPLedger.account_balance({ account = myAccountId() });
       case (#btc) {
         let amount = await getBitcoinBalance();
         { e8s = amount }
       };
       case (#xtc) {
-        // TODO - implement XTC balance check
-        P.unreachable()
+        let amount = await getXTCBalance();
+        { e8s = Nat64.fromNat(amount) }
       }
     }
   };
@@ -769,12 +744,12 @@ actor BeamEscrow {
       Principal,
       Principal
     );
-    #createBeamEscrow : () -> (TokenAmount, BlockIndex, Time, Principal, Principal);
-    #createRelationBeamEscrow : () -> (TokenAmount, BlockIndex, Time, Principal, Principal, BeamRelationObjId);
+    #createBeamEscrow : () -> (TokenAmount, TokenType, BlockIndex, Time, Principal, Principal);
+    #createRelationBeamEscrow : () -> (TokenAmount, TokenType, BlockIndex, Time, Principal, Principal, BeamRelationObjId);
     #buyerClaim : () -> (EscrowId, TokenType, AccountIdentifier);
-    #creatorClaim : () -> (EscrowId, TokenType, AccountIdentifier);
+    #creatorClaimByAccountId : () -> (EscrowId, TokenType, AccountIdentifier);
     #creatorClaimByPrincipal : () -> (EscrowId, TokenType, Principal);
-    #creatorClaimBTC : () -> (EscrowId, TokenType, BitcoinAddress);
+    #creatorClaimBTC : () -> (EscrowId, BitcoinAddress);
     #verifyBTCDeposit : () -> TokenAmount;
 
     // update type get - non-anonymous, arg size <= 256, 512
@@ -811,16 +786,16 @@ actor BeamEscrow {
         not Guard.isAnonymous(caller) and not Guard.isAnonymous(buyerPrinciapl) and not Guard.isAnonymous(creatorPrinciapl)
       };
       case (#createBeamEscrow n) {
-        let (_, _, _, buyerPrinciapl, creatorPrinciapl) = n();
+        let (_, _, _, _, buyerPrinciapl, creatorPrinciapl) = n();
         not Guard.isAnonymous(caller) and not Guard.isAnonymous(buyerPrinciapl) and not Guard.isAnonymous(creatorPrinciapl)
       };
       case (#createRelationBeamEscrow n) {
-        let (_, _, _, buyerPrinciapl, creatorPrinciapl, _) = n();
+        let (_, _, _, _, buyerPrinciapl, creatorPrinciapl, _) = n();
         not Guard.isAnonymous(caller) and not Guard.isAnonymous(buyerPrinciapl) and not Guard.isAnonymous(creatorPrinciapl)
       };
 
       case (#buyerClaim _) not Guard.isAnonymous(caller);
-      case (#creatorClaim _) not Guard.isAnonymous(caller);
+      case (#creatorClaimByAccountId _) not Guard.isAnonymous(caller);
       case (#creatorClaimByPrincipal _) not Guard.isAnonymous(caller);
       case (#creatorClaimBTC _) not Guard.isAnonymous(caller);
       case (#verifyBTCDeposit _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 256);
