@@ -1,18 +1,17 @@
-import R "mo:base/Result";
-import Principal "mo:base/Principal";
-
-import Ledger "canister:ledger";
 import BeamEscrow "canister:beamescrow";
+import ICPLedger "canister:ledger";
 
-import Account "../model/ledger/Account";
-import EscrowType "../model/escrow/EscrowType";
-import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
-import BitcoinType "../bitcoin/BitcoinType";
+import Principal "mo:base/Principal";
+import R "mo:base/Result";
+
 import BitcoinApi "../bitcoin/BitcoinApi";
-
-import Http "../http/Http";
-import Err "../utils/Error";
+import BitcoinType "../bitcoin/BitcoinType";
 import Env "../config/Env";
+import Http "../http/Http";
+import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
+import EscrowType "../model/escrow/EscrowType";
+import Account "../model/icp/Account";
+import Err "../utils/Error";
 
 actor MonitorAgent {
 
@@ -46,8 +45,8 @@ actor MonitorAgent {
     #ok("passed")
   };
 
-  func getEscrowICPBalance() : async Ledger.Tokens {
-    await Ledger.account_balance({ account = beamEscrowCanisterAccountId() })
+  func getEscrowICPBalance() : async ICPLedger.Tokens {
+    await ICPLedger.account_balance({ account = beamEscrowCanisterAccountId() })
   };
 
   func beamEscrowCanisterAccountId() : AccountIdentifier {
