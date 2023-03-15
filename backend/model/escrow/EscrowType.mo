@@ -42,6 +42,7 @@ module EscrowType {
   public type EscrowPaymentType = { #beam; #lumpSum };
 
   let ICPTransferFee : Nat64 = 10_000;
+  let XTCTransferFee : Nat64 = 2000000000;
 
   public type EscrowContract = {
     id : EscrowId;
@@ -349,7 +350,7 @@ module EscrowType {
   public func tokenTransferFee(tokenType : TokenType) : Nat64 {
     switch tokenType {
       case (#icp) ICPTransferFee;
-      case (#xtc) 0;
+      case (#xtc) XTCTransferFee;
       case _ 0
     }
   };
