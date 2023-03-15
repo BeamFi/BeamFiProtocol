@@ -6,10 +6,10 @@ import Nat8 "mo:base/Nat8";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 
-import CRC32 "./CRC32";
 import SHA224 "./SHA224";
+import CRC32 "CRC32";
 
-module {
+module Account {
   // 32-byte array.
   public type AccountIdentifier = Blob;
   // 32-byte array.

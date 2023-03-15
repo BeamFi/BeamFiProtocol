@@ -1,4 +1,4 @@
-import Ledger "canister:ledger";
+import ICPLedger "canister:ledger";
 
 import Float "mo:base/Float";
 import Hash "mo:base/Hash";
@@ -7,13 +7,14 @@ import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
 import Order "mo:base/Order";
+import P "mo:base/Prelude";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import T "mo:base/Time";
 import Trie "mo:base/Trie";
 
 import Env "../../config/Env";
-import Account "../ledger/Account";
+import Account "../icp/Account";
 
 module EscrowType {
 
@@ -28,7 +29,7 @@ module EscrowType {
   public type TokenType = { #icp; #btc; #xtc };
   public type BlockIndex = Nat64;
 
-  type Block = Ledger.Block;
+  type Block = ICPLedger.Block;
 
   public type Hash = Hash.Hash;
 
@@ -39,6 +40,8 @@ module EscrowType {
   public type BeamEscrowPPStore = Trie.Trie<Principal, [EscrowId]>;
 
   public type EscrowPaymentType = { #beam; #lumpSum };
+
+  let ICPTransferFee : Nat64 = 10_000;
 
   public type EscrowContract = {
     id : EscrowId;
@@ -341,6 +344,14 @@ module EscrowType {
 
   public func checkBuyerClaimPermissionAccess(escrow : EscrowContract, caller : Principal) : Bool {
     escrow.buyerPrincipal == caller
+  };
+
+  public func tokenTransferFee(tokenType : TokenType) : Nat64 {
+    switch tokenType {
+      case (#icp) ICPTransferFee;
+      case (#xtc) 0;
+      case _ P.unreachable()
+    }
   };
 
   public func errorMesg(errorCode : ErrorCode) : Text {
