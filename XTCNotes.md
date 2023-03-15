@@ -16,6 +16,14 @@ dfx canister --network=ic call aanaa-xaaaa-aaaah-aaeiq-cai transferErc20 "(princ
 
 (variant { 17_724 = 98_949 : nat })
 
+### Get Transaction Detail
+
+E.g TXID - 98949
+
+```
+dfx canister --network=ic call aanaa-xaaaa-aaaah-aaeiq-cai getTransaction "(98949:nat)"
+```
+
 ### Query balance
 
 ```
