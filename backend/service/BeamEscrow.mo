@@ -320,7 +320,7 @@ actor BeamEscrow {
     let res = switch tokenType {
       case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
       case (#xtc) await XTC.transfer(amountMinusFee, creatorPrinciapl);
-      case _ P.unreachable()
+      case _ #err(#escrow_invalid_token_type("Only support ICP or XRC for claiming with creatorClaimByPrincipal"))
     };
 
     // Security - note another party can call claim here while transfer token is processing
@@ -364,7 +364,7 @@ actor BeamEscrow {
     let memo = Nat64.fromNat(Nat32.toNat(escrowId));
     let res = switch tokenType {
       case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
-      case _ P.unreachable()
+      case _ #err(#escrow_invalid_token_type("Only support ICP for claiming with creatorClaimByAccountId"))
     };
     // Security - note another party can call claim here while transfer token is processing
 
@@ -459,7 +459,7 @@ actor BeamEscrow {
     let memo = Nat64.fromNat(Nat32.toNat(escrowId));
     let res = switch tokenType {
       case (#icp) await ICP.transfer(amountMinusFee, EscrowType.tokenTransferFee(tokenType), memo, accountId);
-      case _ P.unreachable()
+      case _ #err(#escrow_invalid_token_type("Only support ICP for claiming with buyerClaim"))
     };
     // Security - note another party can call claim here while transfer token is processing
 

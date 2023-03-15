@@ -350,7 +350,7 @@ module EscrowType {
     switch tokenType {
       case (#icp) ICPTransferFee;
       case (#xtc) 0;
-      case _ P.unreachable()
+      case _ 0
     }
   };
 
