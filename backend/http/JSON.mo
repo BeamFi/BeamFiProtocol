@@ -97,8 +97,6 @@ module JSON {
   public func extractString(key : Text, obj : [(Text, JSONParser.JSON)]) : ?Text {
     for (i in Iter.range(0, obj.size() - 1)) {
       let (jsonKey, jsonValue) = obj[i];
-      Debug.print("json: " # Nat.toText(i) # jsonKey);
-
       switch (obj[i]) {
         case ((jsonKey, #String(w))) {
           if (jsonKey == key) {

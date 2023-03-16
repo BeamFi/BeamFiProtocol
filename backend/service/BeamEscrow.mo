@@ -660,8 +660,7 @@ actor BeamEscrow {
 
   // Returns current balance on the default account of this canister, only admin manager can access
   public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
-    // TODO - Enable this after testing
-    // requireManager(caller);
+    requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
@@ -802,29 +801,6 @@ actor BeamEscrow {
       case (#updateEscrowAllocation _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 512);
 
       case _ true
-    }
-  };
-
-  // Transfer extra testing XTC back to original wallet
-  // TODO - remove me once it is done
-  public func returnExtraXTC() : async Result<Text, ErrorCode> {
-    let orgPrincipal = Principal.fromText("y3rpf-g74cl-bv6dy-7wsan-cv4cp-ofrsm-ubgyo-mmxfg-lgwp4-pdm4x-nqe");
-    let fee : Nat64 = EscrowType.tokenTransferFee(#xtc);
-
-    let canisterTokens = await myCanisterBalance(#xtc);
-    let amountMinusFee = canisterTokens - fee;
-
-    // transfer XTC back to original wallet
-    let res = await XTCActor.Actor.transferErc20(orgPrincipal, Nat64.toNat(amountMinusFee));
-
-    switch (res) {
-      case (#Ok(blockIndex)) {
-        let mesg = "Paid to " # debug_show orgPrincipal # " in block " # debug_show blockIndex;
-        #ok(mesg)
-      };
-      case (#Err(other)) {
-        #err(#escrow_contract_verification_failed("Unexpected error: " # debug_show other))
-      }
     }
   };
 
