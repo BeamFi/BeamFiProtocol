@@ -1,18 +1,18 @@
-import R "mo:base/Result";
-import Principal "mo:base/Principal";
-
-import Ledger "canister:ledger";
 import BeamEscrow "canister:beamescrow";
+import ICPLedger "canister:ledger";
 
-import Account "../model/ledger/Account";
-import EscrowType "../model/escrow/EscrowType";
-import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
-import BitcoinType "../bitcoin/BitcoinType";
+import Principal "mo:base/Principal";
+import R "mo:base/Result";
+
 import BitcoinApi "../bitcoin/BitcoinApi";
-
-import Http "../http/Http";
-import Err "../utils/Error";
+import BitcoinType "../bitcoin/BitcoinType";
 import Env "../config/Env";
+import Http "../http/Http";
+import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
+import EscrowType "../model/escrow/EscrowType";
+import Account "../model/icp/Account";
+import XTCActor "../remote/xtc/XTC";
+import Err "../utils/Error";
 
 actor MonitorAgent {
 
@@ -24,6 +24,24 @@ actor MonitorAgent {
   type HttpResponse = Http.HttpResponse;
 
   type Satoshi = BitcoinType.Satoshi;
+
+  // #### XTC Solvency
+  public shared ({ caller }) func checkEscrowXTCSolvency() : async Result<Text, ErrorCode> {
+    await privateCheckEscrowXTCSolvency()
+  };
+
+  func privateCheckEscrowXTCSolvency() : async Result<Text, ErrorCode> {
+    // Verify All Contracts XTC <= actual XTC tokens owned by this canister, requires await
+    let canisterXTCTokens = await XTCActor.balanceOf(Principal.fromActor(BeamEscrow));
+    let sumAllEscrowTokenAmount = await BeamEscrow.sumAllEscrowTokens(#xtc);
+
+    let isMatched = EscrowType.verifyAllEscrowMatchedActual(sumAllEscrowTokenAmount, canisterXTCTokens);
+    if (not isMatched) {
+      return #err(#escrow_token_owned_not_matched("The actual XTC owned by the BeamEscrow canister is smaller than the total escrow amount of all contracts"))
+    };
+
+    #ok("passed")
+  };
 
   // #### ICP Solvency
   public shared ({ caller }) func checkEscrowICPSolvency() : async Result<Text, ErrorCode> {
@@ -37,7 +55,7 @@ actor MonitorAgent {
 
     let isMatched = EscrowType.verifyAllEscrowMatchedActual(
       sumAllEscrowTokenAmount,
-      canisterICPTokens.e8s
+      canisterICPTokens
     );
     if (not isMatched) {
       return #err(#escrow_token_owned_not_matched("The actual ICP owned by the BeamEscrow canister is smaller than the total escrow amount of all contracts"))
@@ -46,8 +64,13 @@ actor MonitorAgent {
     #ok("passed")
   };
 
-  func getEscrowICPBalance() : async Ledger.Tokens {
-    await Ledger.account_balance({ account = beamEscrowCanisterAccountId() })
+  func getEscrowICPBalance() : async Nat64 {
+    let bal = await ICPLedger.account_balance({ account = beamEscrowCanisterAccountId() });
+    bal.e8s
+  };
+
+  func getEscrowXTCBalance() : async Nat64 {
+    await XTCActor.balanceOf(Principal.fromActor(BeamEscrow))
   };
 
   func beamEscrowCanisterAccountId() : AccountIdentifier {
@@ -103,6 +126,14 @@ actor MonitorAgent {
         switch (endPoint) {
           case "/icp" {
             let result = await privateCheckEscrowICPSolvency();
+
+            switch result {
+              case (#ok _) Http.TextContent("passed");
+              case (#err _) Http.ServerError()
+            }
+          };
+          case "/xtc" {
+            let result = await privateCheckEscrowXTCSolvency();
 
             switch result {
               case (#ok _) Http.TextContent("passed");

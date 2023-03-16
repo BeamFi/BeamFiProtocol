@@ -22,7 +22,7 @@ module BeamOutType {
 
   // e8s token format
   public type TokenAmount = Nat64;
-  public type TokenType = { #icp };
+  public type TokenType = { #icp; #xtc };
 
   type Time = T.Time;
   type Hash = H.Hash;

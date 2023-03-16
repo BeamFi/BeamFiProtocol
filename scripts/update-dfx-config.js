@@ -6,7 +6,7 @@ const OutputDFXFile = DFXFile
 
 async function main() {
   dfxJSON["canisters"]["ledger"]["candid"] =
-    "backend/remote/ledger/ledger.private.did"
+    "backend/remote/icp/ledger.private.did"
 
   try {
     const content = JSON.stringify(dfxJSON)

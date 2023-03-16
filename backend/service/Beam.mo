@@ -252,8 +252,6 @@ actor Beam {
       case (#ok content)();
       case (#err content) {
         // Rollback if updateEscrowAllocation fails
-        Debug.print(debug_show content);
-
         // --- Atomicity starts ---
 
         // load the beam again due to reentrancy, the beam above may have changed after updateEscrowAllocation

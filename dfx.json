@@ -18,9 +18,9 @@
     "ledger": {
       "type": "custom",
       "wasm": "local/ledger/ledger.wasm",
-      "candid": "backend/remote/ledger/ledger.public.did",
+      "candid": "backend/remote/icp/ledger.public.did",
       "remote": {
-        "candid": "backend/remote/ledger/ledger.public.did",
+        "candid": "backend/remote/icp/ledger.public.did",
         "id": {
           "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }

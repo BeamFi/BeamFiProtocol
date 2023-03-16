@@ -142,7 +142,7 @@ Update the value from:
 
 ```
 
-backend/remote/ledger/ledger.public.did
+backend/remote/icp/ledger.public.did
 
 ```
 
@@ -150,7 +150,7 @@ to
 
 ```
 
-backend/remote/ledger/ledger.private.did
+backend/remote/icp/ledger.private.did
 
 ```
 
@@ -177,7 +177,7 @@ Update the value to:
 
 ```
 
-backend/remote/ledger/ledger.public.did
+backend/remote/icp/ledger.public.did
 
 ```
 

@@ -52,7 +52,7 @@ buyerDeposit() {
   printf "blockIndex=$blockIndex\n"
 
   # call beamescrow.createBeamEscrow
-  result=$(dfx canister call beamescrow createBeamEscrow "($EscrowAmountICPE8S, $blockIndex, $DueDate, principal \"$BuyerPrincipal\", principal \"$CreatorPrincipal\")")
+  result=$(dfx canister call beamescrow createBeamEscrow "($EscrowAmountICPE8S, variant { icp }, $blockIndex, $DueDate, principal \"$BuyerPrincipal\", principal \"$CreatorPrincipal\")")
 
   # assert ok
   if [[ $result =~ "ok" ]];
