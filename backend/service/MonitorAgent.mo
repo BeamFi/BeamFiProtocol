@@ -11,6 +11,7 @@ import Http "../http/Http";
 import EscrowStoreHelper "../model/escrow/EscrowStoreHelper";
 import EscrowType "../model/escrow/EscrowType";
 import Account "../model/icp/Account";
+import XTCActor "../remote/xtc/XTC";
 import Err "../utils/Error";
 
 actor MonitorAgent {
@@ -24,6 +25,24 @@ actor MonitorAgent {
 
   type Satoshi = BitcoinType.Satoshi;
 
+  // #### XTC Solvency
+  public shared ({ caller }) func checkEscrowXTCSolvency() : async Result<Text, ErrorCode> {
+    await privateCheckEscrowXTCSolvency()
+  };
+
+  func privateCheckEscrowXTCSolvency() : async Result<Text, ErrorCode> {
+    // Verify All Contracts XTC <= actual XTC tokens owned by this canister, requires await
+    let canisterXTCTokens = await XTCActor.balanceOf(Principal.fromActor(BeamEscrow));
+    let sumAllEscrowTokenAmount = await BeamEscrow.sumAllEscrowTokens(#xtc);
+
+    let isMatched = EscrowType.verifyAllEscrowMatchedActual(sumAllEscrowTokenAmount, canisterXTCTokens);
+    if (not isMatched) {
+      return #err(#escrow_token_owned_not_matched("The actual XTC owned by the BeamEscrow canister is smaller than the total escrow amount of all contracts"))
+    };
+
+    #ok("passed")
+  };
+
   // #### ICP Solvency
   public shared ({ caller }) func checkEscrowICPSolvency() : async Result<Text, ErrorCode> {
     await privateCheckEscrowICPSolvency()
@@ -36,7 +55,7 @@ actor MonitorAgent {
 
     let isMatched = EscrowType.verifyAllEscrowMatchedActual(
       sumAllEscrowTokenAmount,
-      canisterICPTokens.e8s
+      canisterICPTokens
     );
     if (not isMatched) {
       return #err(#escrow_token_owned_not_matched("The actual ICP owned by the BeamEscrow canister is smaller than the total escrow amount of all contracts"))
@@ -45,8 +64,13 @@ actor MonitorAgent {
     #ok("passed")
   };
 
-  func getEscrowICPBalance() : async ICPLedger.Tokens {
-    await ICPLedger.account_balance({ account = beamEscrowCanisterAccountId() })
+  func getEscrowICPBalance() : async Nat64 {
+    let bal = await ICPLedger.account_balance({ account = beamEscrowCanisterAccountId() });
+    bal.e8s
+  };
+
+  func getEscrowXTCBalance() : async Nat64 {
+    await XTCActor.balanceOf(Principal.fromActor(BeamEscrow))
   };
 
   func beamEscrowCanisterAccountId() : AccountIdentifier {

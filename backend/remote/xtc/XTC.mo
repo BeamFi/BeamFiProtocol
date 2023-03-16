@@ -1,3 +1,4 @@
+import Nat64 "mo:base/Nat64";
 import Principal "mo:base/Principal";
 import T "mo:base/Time";
 
@@ -35,6 +36,11 @@ module XTC {
     balanceOf : (Principal) -> async Nat;
     getTransaction : (Nat) -> async TxRecord;
     transferErc20 : (Principal, Nat) -> async TxReceipt
+  };
+
+  public func balanceOf(principal : Principal) : async Nat64 {
+    let balance = await Actor.balanceOf(principal);
+    Nat64.fromNat(balance)
   };
 
 }

@@ -175,7 +175,7 @@ actor BeamEscrow {
     let sumAllEscrowTokenAmount = EscrowStoreHelper.sumAllEscrowTokens(escrowStore, tokenType);
     let isMatched = EscrowType.verifyAllEscrowMatchedActual(
       sumAllEscrowTokenAmount + escrowAmount,
-      canisterTokens.e8s
+      canisterTokens
     );
     if (not isMatched) {
       return #err(#escrow_token_owned_not_matched("The actual tokens owned by the canister is smaller than the total escrow amount of all contracts"))
@@ -658,29 +658,20 @@ actor BeamEscrow {
   };
   // ---- End of Bitcoin
 
-  // ---- XTC
-  func getXTCBalance() : async Nat {
-    await XTCActor.Actor.balanceOf(Principal.fromActor(BeamEscrow))
-  };
-  // ---- End of XTC
-
   // Returns current balance on the default account of this canister, only admin manager can access
-  public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async ICPLedger.Tokens {
+  public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
     requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
-  func myCanisterBalance(tokenType : TokenType) : async ICPLedger.Tokens {
+  func myCanisterBalance(tokenType : TokenType) : async Nat64 {
     switch tokenType {
-      case (#icp) await ICPLedger.account_balance({ account = myAccountId() });
-      case (#btc) {
-        let amount = await getBitcoinBalance();
-        { e8s = amount }
+      case (#icp) {
+        let ledgerAmount = await ICPLedger.account_balance({ account = myAccountId() });
+        ledgerAmount.e8s
       };
-      case (#xtc) {
-        let amount = await getXTCBalance();
-        { e8s = Nat64.fromNat(amount) }
-      }
+      case (#btc) await getBitcoinBalance();
+      case (#xtc) await XTCActor.balanceOf(Principal.fromActor(BeamEscrow))
     }
   };
 
