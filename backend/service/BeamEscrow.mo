@@ -660,7 +660,8 @@ actor BeamEscrow {
 
   // Returns current balance on the default account of this canister, only admin manager can access
   public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
-    requireManager(caller);
+    // TODO - Enable this after testing
+    // requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
