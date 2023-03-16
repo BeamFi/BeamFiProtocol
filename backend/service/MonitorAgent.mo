@@ -132,7 +132,7 @@ actor MonitorAgent {
               case (#err _) Http.ServerError()
             }
           };
-          case "/wtc" {
+          case "/xtc" {
             let result = await privateCheckEscrowXTCSolvency();
 
             switch result {
