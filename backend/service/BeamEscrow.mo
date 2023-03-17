@@ -660,8 +660,7 @@ actor BeamEscrow {
 
   // Returns current balance on the default account of this canister, only admin manager can access
   public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
-    // TODO - remove this after testing
-    // requireManager(caller);
+    requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
@@ -768,10 +767,7 @@ actor BeamEscrow {
     // owner read - won't invoke inspect
     #queryMyBeamEscrow : () -> EscrowId;
     #queryMyBeamEscrowBySender : () -> (EscrowId, Principal);
-    #queryMyBeams : () -> ();
-
-    // Other
-    #returnExtraXTC : () -> ()
+    #queryMyBeams : () -> ()
   };
 
   system func inspect({ arg : Blob; caller : Principal; msg : MesgType }) : Bool {
