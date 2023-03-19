@@ -380,7 +380,7 @@ actor Beam {
             processHealthRequest(queryParams)
           };
           case "/zoom" {
-            Http.TextContentUpgrade("success", true)
+            processZoomReadRequest(req)
           };
           case _ Http.BadRequest()
         }
@@ -396,7 +396,7 @@ actor Beam {
       case (#ok(endPoint, queryParams)) {
         switch (endPoint) {
           case "/zoom" {
-            processZoomRequest(req)
+            processZoomUpdateRequest(req)
           };
           case _ Http.BadRequest()
         }
@@ -423,7 +423,7 @@ actor Beam {
     Http.JsonContent(jsonText, false)
   };
 
-  func processZoomRequest(req : HttpRequest) : HttpResponse {
+  func processZoomReadRequest(req : HttpRequest) : HttpResponse {
     let jsonStr = Text.decodeUtf8(req.body);
 
     switch (jsonStr) {
@@ -442,6 +442,34 @@ actor Beam {
                 let jsonRes = ZoomUtil.processValidationRequest(myStr);
                 return Http.JsonContent(jsonRes, false)
               };
+              case "meeting.started" return Http.TextContentUpgrade("success", true);
+              case _ {
+                return Http.TextContent("No matching events found")
+              }
+            }
+          }
+        };
+
+        Http.JsonContent("", false)
+      }
+    }
+  };
+
+  func processZoomUpdateRequest(req : HttpRequest) : HttpResponse {
+    let jsonStr = Text.decodeUtf8(req.body);
+
+    switch (jsonStr) {
+      case null Http.TextContent("Invalid string");
+      case (?myStr) {
+        var event = ZoomUtil.extractEvent(myStr, 2);
+        if (event == null) {
+          event := ZoomUtil.extractEvent(myStr, 0)
+        };
+
+        switch (event) {
+          case null return Http.TextContent("No event found");
+          case (?myEvent) {
+            switch (myEvent) {
               case "meeting.started" {
                 let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
                 if (not isAuthentic) {
