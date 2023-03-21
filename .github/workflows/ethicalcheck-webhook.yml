@@ -25,7 +25,7 @@
 
 # This is a starter workflow to help you get started with EthicalCheck Actions
 
-name: EthicalCheck-API-Signature
+name: EthicalCheck-API-Webhook
 
 # Controls when the workflow will run
 on:
@@ -36,7 +36,7 @@ on:
   pull_request:
     branches: ["main"]
   schedule:
-    - cron: "18 13 * * 0"
+    - cron: "18 03 * * 0"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -56,7 +56,7 @@ jobs:
         uses: apisec-inc/ethicalcheck-action@005fac321dd843682b1af6b72f30caaf9952c641
         with:
           # The OpenAPI Specification URL or Swagger Path or Public Postman collection URL.
-          oas-url: "https://raw.githubusercontent.com/BeamFi/BeamFiProtocol/dev/beamapi-signature.yml"
+          oas-url: "https://raw.githubusercontent.com/BeamFi/BeamFiProtocol/dev/beamapi-webhook.yml"
           # The email address to which the penetration test report will be sent.
           email: "henry@beamfi.app"
-          sarif-result-file: "ethicalcheck-signature-results.sarif"
+          sarif-result-file: "ethicalcheck-webhook-results.sarif"
