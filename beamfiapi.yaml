@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: BeamFi
+  version: 1.0.0
+servers:
+  - url: http://{{baseurl}}
+paths:
+  /api/signature:
+    post:
+      tags:
+        - default
+      summary: Zoom Meeting API Signature - Prod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                meetingNumber: 123456
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
