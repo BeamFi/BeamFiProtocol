@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: BeamFi
+  version: 1.0.0
+servers:
+  - url: https://2ekax-oqaaa-aaaah-qc6qa-cai.raw.ic0.app
+  - url: https://gwdqt-kyaaa-aaaah-abvma-cai.raw.ic0.app
+paths:
+  /zoom:
+    post:
+      tags:
+        - default
+      summary: Zoom Webhook Validation Prod
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                payload:
+                  plainToken: qgg8vlvZRS6UYooatFL8Aw
+                event_ts: 1654503849680
+                event: endpoint.url_validation
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
