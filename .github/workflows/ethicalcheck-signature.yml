@@ -26,7 +26,7 @@
 
 # This is a starter workflow to help you get started with EthicalCheck Actions
 
-name: EthicalCheck-Workflow
+name: EthicalCheck-API-Signature
 
 # Controls when the workflow will run
 on:
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-       - name: EthicalCheck  Free & Automated API Security Testing Service
+       - name: EthicalCheck Free & Automated API Security Testing Service
          uses: apisec-inc/ethicalcheck-action@005fac321dd843682b1af6b72f30caaf9952c641
          with:
           # The OpenAPI Specification URL or Swagger Path or Public Postman collection URL.
@@ -62,8 +62,8 @@ jobs:
           email: "henry@beamfi.app"
           sarif-result-file: "ethicalcheck-results.sarif"
 
-       - name: Upload sarif file to repository
-         uses: github/codeql-action/upload-sarif@v2
-         with:
-          sarif_file: ./ethicalcheck-results.sarif
+       #- name: Upload sarif file to repository
+       #  uses: github/codeql-action/upload-sarif@v2
+       #  with:
+       #   sarif_file: ./ethicalcheck-results.sarif
 
