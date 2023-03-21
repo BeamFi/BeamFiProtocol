@@ -3,7 +3,8 @@ info:
   title: BeamFi
   version: 1.0.0
 servers:
-  - url: http://{{baseurl}}
+  - url: http://meeting-api-dev.beamfi.app
+  - url: http://meeting-api.beamfi.app
 paths:
   /api/signature:
     post:
