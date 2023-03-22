@@ -380,7 +380,7 @@ actor Beam {
             processHealthRequest(queryParams)
           };
           case "/zoom" {
-            processZoomReadRequest(req)
+            processZoomReadRequest(req, queryParams)
           };
           case _ Http.BadRequest()
         }
@@ -423,7 +423,11 @@ actor Beam {
     Http.JsonContent(jsonText, false)
   };
 
-  func processZoomReadRequest(req : HttpRequest) : HttpResponse {
+  func processZoomReadRequest(req : HttpRequest, queryParams : [QueryParam]) : HttpResponse {
+    if (not Http.checkKey(queryParams, "clientKey", Env.clientKey)) {
+      return Http.BadRequest()
+    };
+
     let jsonStr = Text.decodeUtf8(req.body);
 
     switch (jsonStr) {
