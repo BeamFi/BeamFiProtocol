@@ -447,6 +447,14 @@ actor Beam {
                 return Http.JsonContent(jsonRes, false)
               };
               case "meeting.started" return Http.TextContentUpgrade("success", true);
+              case "app_deauthorized" {
+                let isAuthentic = ZoomUtil.verifySignature(myStr, req.headers);
+                if (not isAuthentic) {
+                  return Http.BadRequestWith("Invalid signature")
+                };
+
+                return Http.TextContent("Event processed successfully")
+              };
               case _ {
                 return Http.TextContent("No matching events found")
               }
