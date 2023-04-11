@@ -66,8 +66,8 @@ actor Beam {
   let topNBeams : Nat = 5;
   let require = Guard.require;
 
-  // 10 secs in nanoseconds
-  let timerBeamPaymentEveryN : Nat64 = 10_000_000_000;
+  // 60 secs in nanoseconds
+  let timerBeamPaymentEveryN : Nat64 = 60_000_000_000;
 
   // Public func - Create new Beam for the EscrowContract escrowId and start beaming
   // @return beamId if #ok, errorCode if #err
