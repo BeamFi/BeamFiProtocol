@@ -66,10 +66,8 @@ actor Beam {
   let topNBeams : Nat = 5;
   let require = Guard.require;
 
-  // Persistent heartbeat count
-  var hbCount = 0;
-  // 3 beats ~ 6-9 secs
-  let hbBeamPaymentEveryN = 3;
+  // 10 secs in nanoseconds
+  let timerBeamPaymentEveryN : Nat64 = 10_000_000_000;
 
   // Public func - Create new Beam for the EscrowContract escrowId and start beaming
   // @return beamId if #ok, errorCode if #err
@@ -284,13 +282,12 @@ actor Beam {
     assert (false)
   };
 
-  // Triggered during heartbeat, check if should call processActiveBeams
-  system func heartbeat() : async () {
-    if (hbCount % hbBeamPaymentEveryN == 0) {
-      await processActiveBeams()
-    };
+  // Triggered processActiveBeans every 10 seconds
+  system func timer(setGlobalTimer : Nat64 -> ()) : async () {
+    let next = Nat64.fromIntWrap(T.now()) + timerBeamPaymentEveryN;
+    setGlobalTimer(next); // absolute time in nanoseconds
 
-    hbCount += 1
+    await processActiveBeams()
   };
 
   // Public func - simple health check
