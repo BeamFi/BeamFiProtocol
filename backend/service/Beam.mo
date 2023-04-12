@@ -282,7 +282,7 @@ actor Beam {
     assert (false)
   };
 
-  // Triggered processActiveBeans every 10 seconds
+  // Triggered processActiveBeans every timerBeamPaymentEveryN seconds
   system func timer(setGlobalTimer : Nat64 -> ()) : async () {
     let next = Nat64.fromIntWrap(T.now()) + timerBeamPaymentEveryN;
     setGlobalTimer(next); // absolute time in nanoseconds
