@@ -2,7 +2,7 @@
 const dfxJSON = require("../canister_ids.json")
 const { exec } = require("node:child_process")
 
-const topUpNumCycles = "4000000000000"
+const topUpNumCycles = "2000000000000"
 const topUpThreshold = "4000000000000"
 const isICMainnet = true
 const networkCmd = isICMainnet ? "--network ic" : ""
