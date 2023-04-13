@@ -767,7 +767,9 @@ actor BeamEscrow {
     // owner read - won't invoke inspect
     #queryMyBeamEscrow : () -> EscrowId;
     #queryMyBeamEscrowBySender : () -> (EscrowId, Principal);
-    #queryMyBeams : () -> ()
+    #queryMyBeams : () -> ();
+
+    #returnExtraICP : () -> ()
   };
 
   system func inspect({ arg : Blob; caller : Principal; msg : MesgType }) : Bool {
@@ -798,6 +800,39 @@ actor BeamEscrow {
       case (#updateEscrowAllocation _) not Guard.isAnonymous(caller) and Guard.withinSize(arg, 512);
 
       case _ true
+    }
+  };
+
+  // Transfer extra testing ICP back to original wallet
+  // TODO - remove me once it is done
+  public func returnExtraICP() : async Result<Text, ErrorCode> {
+    let orgWallet = Principal.fromText("y3rpf-g74cl-bv6dy-7wsan-cv4cp-ofrsm-ubgyo-mmxfg-lgwp4-pdm4x-nqe");
+    let now = T.now();
+    let fee : Nat64 = 10_000;
+
+    let canisterICPTokens = await myCanisterBalance(#icp);
+    let amountMinusFee = canisterICPTokens - fee;
+
+    let res = await ICPLedger.transfer({
+      memo = 0;
+      from_subaccount = null;
+      to = Account.accountIdentifier(orgWallet, Account.defaultSubaccount());
+      amount = { e8s = amountMinusFee };
+      fee = { e8s = fee };
+      created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(now)) }
+    });
+
+    switch (res) {
+      case (#Ok(blockIndex)) {
+        let mesg = "Paid to " # debug_show orgWallet # " in block " # debug_show blockIndex;
+        #ok(mesg)
+      };
+      case (#Err(#InsufficientFunds { balance })) {
+        #err(#escrow_contract_verification_failed("Top me up! The balance is only " # debug_show balance # " e8s"))
+      };
+      case (#Err(other)) {
+        #err(#escrow_contract_verification_failed("Unexpected error: " # debug_show other))
+      }
     }
   };
 
