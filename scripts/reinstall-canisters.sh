@@ -27,7 +27,7 @@ run_cmd()
 # Deploy & Upgrade Canisters
 npm install -g yes
 mkdir -p .dfx/ic/canisters/idl
-yes yes | dfx deploy beam --network ic --mode reinstall
 yes yes | dfx deploy beamout --network ic --mode reinstall
 yes yes | dfx deploy beamescrow --network ic --mode reinstall
+yes yes | dfx deploy beam --network ic --mode reinstall
 yes yes | dfx deploy monitoragent --network ic --mode reinstall
