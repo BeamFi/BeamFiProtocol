@@ -660,7 +660,7 @@ actor BeamEscrow {
 
   // Returns current balance on the default account of this canister, only admin manager can access
   public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
-    // requireManager(caller);
+    requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
@@ -767,10 +767,7 @@ actor BeamEscrow {
     // owner read - won't invoke inspect
     #queryMyBeamEscrow : () -> EscrowId;
     #queryMyBeamEscrowBySender : () -> (EscrowId, Principal);
-    #queryMyBeams : () -> ();
-
-    #returnExtraICP : () -> ();
-    #returnExtraXTC : () -> ()
+    #queryMyBeams : () -> ()
   };
 
   system func inspect({ arg : Blob; caller : Principal; msg : MesgType }) : Bool {
@@ -804,59 +801,4 @@ actor BeamEscrow {
     }
   };
 
-  // Transfer extra testing ICP back to original wallet
-  // TODO - remove me once it is done
-  public func returnExtraICP() : async Result<Text, ErrorCode> {
-    let orgWallet = Principal.fromText("y3rpf-g74cl-bv6dy-7wsan-cv4cp-ofrsm-ubgyo-mmxfg-lgwp4-pdm4x-nqe");
-    let now = T.now();
-    let fee : Nat64 = 10_000;
-
-    let canisterICPTokens = await myCanisterBalance(#icp);
-    let amountMinusFee = canisterICPTokens - fee;
-
-    let res = await ICPLedger.transfer({
-      memo = 0;
-      from_subaccount = null;
-      to = Account.accountIdentifier(orgWallet, Account.defaultSubaccount());
-      amount = { e8s = amountMinusFee };
-      fee = { e8s = fee };
-      created_at_time = ?{ timestamp_nanos = Nat64.fromNat(Int.abs(now)) }
-    });
-
-    switch (res) {
-      case (#Ok(blockIndex)) {
-        let mesg = "Paid to " # debug_show orgWallet # " in block " # debug_show blockIndex;
-        #ok(mesg)
-      };
-      case (#Err(#InsufficientFunds { balance })) {
-        #err(#escrow_contract_verification_failed("Top me up! The balance is only " # debug_show balance # " e8s"))
-      };
-      case (#Err(other)) {
-        #err(#escrow_contract_verification_failed("Unexpected error: " # debug_show other))
-      }
-    }
-  };
-
-  // Transfer extra testing XTC back to original wallet
-  // TODO - remove me once it is done
-  public func returnExtraXTC() : async Result<Text, ErrorCode> {
-    let orgPrincipal = Principal.fromText("y3rpf-g74cl-bv6dy-7wsan-cv4cp-ofrsm-ubgyo-mmxfg-lgwp4-pdm4x-nqe");
-    let fee : Nat64 = EscrowType.tokenTransferFee(#xtc);
-
-    let canisterTokens = await myCanisterBalance(#xtc);
-    let amountMinusFee = canisterTokens - fee;
-
-    // transfer XTC back to original wallet
-    let res = await XTCActor.Actor.transferErc20(orgPrincipal, Nat64.toNat(amountMinusFee));
-
-    switch (res) {
-      case (#Ok(blockIndex)) {
-        let mesg = "Paid to " # debug_show orgPrincipal # " in block " # debug_show blockIndex;
-        #ok(mesg)
-      };
-      case (#Err(other)) {
-        #err(#escrow_contract_verification_failed("Unexpected error: " # debug_show other))
-      }
-    }
-  }
 }

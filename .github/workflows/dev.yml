@@ -82,7 +82,7 @@ jobs:
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK }}
           ZOOM_SECRET_TOKEN: ${{ secrets.ZOOM_SECRET_TOKEN }}
       - name: Build and deploy backend canisters to Internet Computer network
-        run: ./scripts/reinstall-canisters.sh
+        run: ./scripts/upgrade-canisters.sh
       - name: Stop DFX server
         run: dfx stop
       - name: Show success mesg
