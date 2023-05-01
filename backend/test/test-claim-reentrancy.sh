@@ -29,7 +29,7 @@ init() {
   BuyerAccountId=$(dfx ledger account-id)
 
   #  create creator identity
-  dfx identity new creator --disable-encryption
+  dfx identity new creator --storage-mode=plaintext
   dfx identity use creator
   CreatorPrincipal=$(dfx identity get-principal)
   CreatorAccountId=$(dfx ledger account-id)

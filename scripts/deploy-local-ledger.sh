@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo Create Identity
-dfx identity new minter --disable-encryption
+dfx identity new minter --storage-mode=plaintext
 dfx identity use minter
 export MINT_ACC=$(dfx ledger account-id)
 
