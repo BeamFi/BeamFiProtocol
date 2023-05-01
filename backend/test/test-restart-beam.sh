@@ -29,7 +29,7 @@ init() {
   BuyerAccountId=$(dfx ledger account-id)
 
   #  create creator identity
-  dfx identity new creator --disable-encryption
+  dfx identity new creator --storage-mode=plaintext
   dfx identity use creator
   CreatorPrincipal=$(dfx identity get-principal)
   CreatorAccountId=$(dfx ledger account-id)
@@ -148,23 +148,19 @@ runTest() {
   
   # sleep to wait for beam to update allocations
   printf "Sleeping to wait for Beam to update creator's allocation\n"
-  sleep 8
+  sleep 30
 
   # stop beam
   stopBeam $EscrowId
 
   showBeamByEscrowId $EscrowId
 
-  # sleep to wait for other process to finish running
-  # printf "Sleeping to wait for Beam to stop completely\n"
-  # sleep 8
-
   # check and note BeamEscrow creatorClaimable and set to claimable
   claimable=$(checkCreatorClaimable $EscrowId)
 
   # sleep to wait for beam (in case beam hasn't been stopped)
   printf "Sleeping to wait for Beam to update creator's allocation\n"
-  sleep 10
+  sleep 30
 
   # check again BeamEscrow creatorClaimable and set to claimableAfterStop
   claimableAfterStop=$(checkCreatorClaimable $EscrowId)
@@ -185,7 +181,7 @@ runTest() {
 
   # sleep to wait for beam to stream
   printf "Sleeping to wait for Beam to update creator's allocation\n"
-  sleep 60
+  sleep 30
 
   # check again BeamEscrow creatorClaimable and set to claimableAfterRestart
   claimableAfterRestart=$(checkCreatorClaimable $EscrowId)
