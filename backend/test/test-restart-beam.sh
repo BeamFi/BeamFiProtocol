@@ -185,7 +185,7 @@ runTest() {
 
   # sleep to wait for beam to stream
   printf "Sleeping to wait for Beam to update creator's allocation\n"
-  sleep 10
+  sleep 60
 
   # check again BeamEscrow creatorClaimable and set to claimableAfterRestart
   claimableAfterRestart=$(checkCreatorClaimable $EscrowId)
@@ -193,9 +193,9 @@ runTest() {
   # if beam has restarted, claimableAfterRestart should be bigger than claimableAfterStop
   if [[ $claimableAfterRestart -gt $claimableAfterStop ]];
   then
-    printf "Beam has restarted correctly 😃\n"
+    printf "Beam has restarted correctly, claimable after restart is bigger than before it 😃\n"
   else
-    printf "Beam hasn't restarted 😭, claimableAfterRestart=$claimableAfterRestart, claimableAfterStop=$claimableAfterStop\n"
+    printf "Beam hasn't restarted 😭, claimable after restart is smaller than or equal to before it, claimableAfterRestart=$claimableAfterRestart, claimableAfterStop=$claimableAfterStop\n"
     exit 1
   fi
 }
