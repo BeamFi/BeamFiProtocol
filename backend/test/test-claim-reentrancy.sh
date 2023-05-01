@@ -159,7 +159,7 @@ runTest() {
   buyerDeposit
   # sleep to wait for beam to update allocations
   printf "Sleeping to wait for Beam to update creator's allocation\n"
-  sleep 20
+  sleep 30
   creatorClaim "ok"&
   creatorClaim "Nothing to claim"&
 }
