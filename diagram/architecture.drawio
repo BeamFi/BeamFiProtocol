@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="KVRml0NFvvnyDox_iJLR" name="Beam">
-        <mxGraphModel dx="856" dy="660" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="916" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="QkdlXIdf6SLyogeyPklL-0"/>
                 <mxCell id="QkdlXIdf6SLyogeyPklL-1" parent="QkdlXIdf6SLyogeyPklL-0"/>
@@ -34,12 +34,12 @@
                         <mxPoint x="652" y="425" as="sourcePoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="lCZoUt_bum-l7q1Iv6DA-17" value="every 3 beats&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="lCZoUt_bum-l7q1Iv6DA-6" vertex="1" connectable="0">
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-17" value="every 60 seconds&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="lCZoUt_bum-l7q1Iv6DA-6" vertex="1" connectable="0">
                     <mxGeometry x="-0.1" y="-2" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="lCZoUt_bum-l7q1Iv6DA-5" value="IC Heart Beat" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
+                <mxCell id="lCZoUt_bum-l7q1Iv6DA-5" value="IC Timer API" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
                     <mxGeometry x="662" y="395" width="30" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="lCZoUt_bum-l7q1Iv6DA-8" value="Beam Out (URL) Canister" style="shape=datastore;whiteSpace=wrap;html=1;" parent="QkdlXIdf6SLyogeyPklL-1" vertex="1">
