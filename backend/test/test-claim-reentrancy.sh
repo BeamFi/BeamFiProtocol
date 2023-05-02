@@ -166,13 +166,18 @@ runTest() {
   printf "Sleeping to wait for Beam to update creator's allocation\n"
   sleep 30
   creatorClaim "Paid to"& claimChild1=$!
+  sleep 1
   creatorClaim "Nothing to claim"& claimChild2=$!
 
   wait $claimChild1
   echo "job claimChild1 returned $?"
+  claimChild1Exit=$?
 
   wait $claimChild2
   echo "job claimChild2 returned $?"
+  claimChild2Exit=$?
+
+  exit $claimChild1Exit || $claimChild2Exit
 }
 
 runTest
