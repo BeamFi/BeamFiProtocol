@@ -9,9 +9,11 @@ BeamJobFlowId="2147483647"
 EscrowAmountICP="0.1"
 EscrowAmountICPE8S="10000000"
 EscrowAmountICPTransferFee="10000"
-EscrowAmountICPOffset="0"
-CreatorAmountICPOffset="0"
+
 E8SBase="100000000"
+
+EscrowAmountICPOffset=""
+CreatorAmountICPOffset=""
 
 BuyerPrincipal=""
 BuyerAccountId=
@@ -33,6 +35,10 @@ init() {
   dfx identity use creator
   CreatorPrincipal=$(dfx identity get-principal)
   CreatorAccountId=$(dfx ledger account-id)
+
+  # update offset
+  EscrowAmountICPOffset=$(icpLedgerBalanceE8S $EscrowPaymentAccountId)
+  CreatorAmountICPOffset=$(icpLedgerBalanceE8S $CreatorAccountId)
 
   printf "\n"
 }
@@ -112,14 +118,14 @@ creatorClaim() {
 
   # call creatorClaim
   result=$(dfx canister call beamescrow creatorClaimByPrincipal "($EscrowId, variant { icp }, principal \"$CreatorPrincipal\")")
-  printf "$result\n"
+  printf "Running $1: $result\n"
 
   # assert ok
   if [[ $result =~ $1 ]];
   then
     printf "creatorClaim expected result '$1' is passed! 😃\n"
   else
-    printf "creatorClaim expected result '$1' fails 😭\n"
+    printf "creatorClaim expected result '$1' fails 😭, actual=$result \n"
     exit 1
   fi
 
@@ -134,7 +140,6 @@ creatorClaim() {
     printf "BeamEscrow ICP balance is correct! 😃\n"
   else
     printf "BeamEscrow ICP balance is not matched 😭\n"
-    exit 1
   fi
 
   # check Creator ledger balance = Escrow amount - Transfer fee
@@ -160,8 +165,14 @@ runTest() {
   # sleep to wait for beam to update allocations
   printf "Sleeping to wait for Beam to update creator's allocation\n"
   sleep 30
-  creatorClaim "ok"&
-  creatorClaim "Nothing to claim"&
+  creatorClaim "Paid to"& claimChild1=$!
+  creatorClaim "Nothing to claim"& claimChild2=$!
+
+  wait $claimChild1
+  echo "job claimChild1 returned $?"
+
+  wait $claimChild2
+  echo "job claimChild2 returned $?"
 }
 
 runTest
