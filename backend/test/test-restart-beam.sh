@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-printf "### 🧑‍💻 Test BeamEscrow Creator Claim Funds Reentrancy 🧑‍💻 ###\n\n"
+printf "### 🧑‍💻 Test Restart Beam 🧑‍💻 ###\n\n"
 
 LedgerCanisterId=$(dfx canister id ledger)
 EscrowPaymentAccountId=$(dfx ledger account-id --of-canister beamescrow)
