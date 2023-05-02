@@ -58,7 +58,6 @@ actor Beam {
   stable var nextBeamId : BeamId = 0;
   stable var version : Nat32 = 0;
 
-  stable var beamStore : Trie.Trie<BeamId, BeamModel> = Trie.empty();
   stable var beamStoreV2 : Trie.Trie<BeamId, BeamModelV2> = Trie.empty();
   stable var escrowBeamStore : Trie.Trie<EscrowId, BeamId> = Trie.empty();
   stable var beamRelationStore : Trie.Trie<BeamRelationObjId, BeamId> = Trie.empty();
@@ -303,18 +302,7 @@ actor Beam {
 
   // Public func - @return actor cycles balance
   public query ({ caller }) func getActorBalance() : async Nat {
-    requireManager(caller);
     return Cycles.balance()
-  };
-
-  // Private func - trap if caller is not manager
-  func requireManager(caller : Principal) : () {
-    require(Env.getManager() == caller)
-  };
-
-  // Public func - @return manager principal
-  public query func getManager() : async Principal {
-    Env.getManager()
   };
 
   // Public func - @return canister memory info
@@ -336,7 +324,6 @@ actor Beam {
     #queryBeamByEscrowIds : () -> [EscrowId];
     #canisterVersion : () -> ();
     #getCanisterMemoryInfo : () -> ();
-    #getManager : () -> ();
     #healthCheck : () -> ();
     #http_request : () -> HttpRequest;
     #http_request_update : () -> HttpRequest
@@ -519,16 +506,6 @@ actor Beam {
         Http.JsonContent("", false)
       }
     }
-  };
-
-  system func postupgrade() {
-    // only upgrade if beamStoreV2 is empty
-    if (not Trie.isEmpty(beamStoreV2)) {
-      Debug.print("Skip migrating beamStore to beamStoreV2 as beamStoreV2 is not empty");
-      return
-    };
-
-    beamStoreV2 := BeamStoreHelper.upgradeBeamStore(beamStore)
   };
 
 }

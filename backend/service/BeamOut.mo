@@ -46,7 +46,6 @@ actor BeamOut {
 
   let version : Nat32 = 1;
 
-  stable var beamOutStore : BeamOutStore = Trie.empty();
   stable var beamOutStoreV4 : BeamOutStoreV4 = Trie.empty();
 
   public func createBeamOut(amount : TokenAmount, tokenType : TokenType, recipient : Principal, durationNumMins : Nat32) : async Result<BeamOutId, ErrorCode> {
@@ -104,14 +103,8 @@ actor BeamOut {
     }
   };
 
-  // Private func - trap if caller is not manager
-  func requireManager(caller : Principal) : () {
-    require(Env.getManager() == caller)
-  };
-
   // Public func - @return actor cycles balance
   public query ({ caller }) func getActorBalance() : async Nat {
-    requireManager(caller);
     return Cycles.balance()
   };
 
@@ -150,16 +143,6 @@ actor BeamOut {
         }
       }
     }
-  };
-
-  system func postupgrade() {
-    // only upgrade if beamOutStoreV4 is empty
-    if (not Trie.isEmpty(beamOutStoreV4)) {
-      Debug.print("Skipping migrating beamOutStore to beamOutStoreV4 as beamOutStoreV4 is not empty");
-      return
-    };
-
-    beamOutStoreV4 := BeamOutStoreHelper.upgradeBeamOutStore(beamOutStore)
   };
 
 }

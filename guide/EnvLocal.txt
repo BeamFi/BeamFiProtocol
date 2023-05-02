@@ -3,23 +3,17 @@ import Principal "mo:base/Principal";
 import BitcoinType "../bitcoin/BitcoinType";
 
 module Env {
-  // Manager - Internet Identity Anchor Id
-  public let managerPrincipalId = "llaiv-papiv-e7wvh-njpek-4e57z-n3fgd-yu3ud-n7tqs-lr5ep-hut3y-wae";
-
-  // Controller Principal Id
-  public let controllerPrincipalId = "ktaun-mznjo-4w2qi-von4m-qodwj-hpm4t-d4yoo-dkzvz-7al2r-px72c-gae";
-
   // Client key
   public let clientKey = "kYWpQC_CJPXkQdz9zuAsnoYu-w_AFiq";
 
   // Beam Escrow Canister ID
-  public let beamEscrowCanisterId = "rkp4c-7iaaa-aaaaa-aaaca-cai";
+  public let beamEscrowCanisterId = "txssk-maaaa-aaaaa-aaanq-cai";
 
   // Monitor Agent Canister ID
-  public let monitorAgentCanisterId = "renrk-eyaaa-aaaaa-aaada-cai";
+  public let monitorAgentCanisterId = "tmxop-wyaaa-aaaaa-aaapa-cai";
 
   // Beam Canister ID
-  public let beamCanisterId = "r7inp-6aaaa-aaaaa-aaabq-cai";
+  public let beamCanisterId = "tqtu6-byaaa-aaaaa-aaana-cai";
 
   // The Bitcoin network to connect to.
   // When developing locally this should be `Regtest`.
@@ -34,11 +28,4 @@ module Env {
     }
   };
 
-  public func getManager() : Principal {
-    Principal.fromText(Env.managerPrincipalId)
-  };
-
-  public func getController() : Principal {
-    Principal.fromText(Env.controllerPrincipalId)
-  }
 }

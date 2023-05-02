@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-echo Setting Internet Identity Anchor ID to $INTERNET_IDENTITY_ANCHOR_ID
-sed -i.bak 's/#INTERNET_IDENTITY_ANCHOR_ID#/'"$INTERNET_IDENTITY_ANCHOR_ID"'/g' './backend/config/Env.mo'
-
-echo Setting Controller Principal ID to $CONTROLLER_PRINCIPAL_ID
-sed -i.bak 's/#CONTROLLER_PRINCIPAL_ID#/'"$CONTROLLER_PRINCIPAL_ID"'/g' './backend/config/Env.mo'
-
 echo Setting Client Key to $CLIENT_KEY
 sed -i.bak 's/#CLIENT_KEY#/'"$CLIENT_KEY"'/g' './backend/config/Env.mo'
 

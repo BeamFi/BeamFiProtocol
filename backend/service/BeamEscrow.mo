@@ -557,13 +557,6 @@ actor BeamEscrow {
     #ok("success")
   };
 
-  // Returns all EscrowContract, only admin manager can access
-  public query ({ caller }) func loadAllEscrow(tokenType : TokenType) : async [EscrowContract] {
-    requireManager(caller);
-
-    EscrowStoreHelper.loadAllEscrowContract(escrowStore, tokenType)
-  };
-
   public query ({ caller }) func queryMyBeams() : async [BeamEscrowContract] {
     EscrowStoreHelper.loadMyBeams(beamEscrowPPStore, escrowStore, caller)
   };
@@ -660,7 +653,6 @@ actor BeamEscrow {
 
   // Returns current balance on the default account of this canister, only admin manager can access
   public shared ({ caller }) func canisterBalance(tokenType : TokenType) : async Nat64 {
-    requireManager(caller);
     await myCanisterBalance(tokenType)
   };
 
@@ -682,10 +674,6 @@ actor BeamEscrow {
 
   func myAccountId() : AccountIdentifier {
     Account.accountIdentifier(Principal.fromActor(BeamEscrow), Account.defaultSubaccount())
-  };
-
-  func requireManager(caller : Principal) : () {
-    require(Env.getManager() == caller)
   };
 
   func requireMonitorAgent(caller : Principal) : () {
@@ -713,12 +701,7 @@ actor BeamEscrow {
   };
 
   public query ({ caller }) func getActorBalance() : async Nat {
-    requireManager(caller);
     return Cycles.balance()
-  };
-
-  public query func getManager() : async Principal {
-    Env.getManager()
   };
 
   public query func getCanisterMemoryInfo() : async Op.CanisterMemoryInfo {
@@ -755,7 +738,6 @@ actor BeamEscrow {
     #canisterAccount : () -> ();
     #canisterVersion : () -> ();
     #getCanisterMemoryInfo : () -> ();
-    #getManager : () -> ();
     #healthCheck : () -> ();
 
     // admin read - won't invoke inspect
