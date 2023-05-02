@@ -3,12 +3,6 @@ import Principal "mo:base/Principal";
 import BitcoinType "../bitcoin/BitcoinType";
 
 module Env {
-  // Manager - Internet Identity Anchor Id
-  public let managerPrincipalId = "#INTERNET_IDENTITY_ANCHOR_ID#";
-
-  // Controller Principal Id
-  public let controllerPrincipalId = "#CONTROLLER_PRINCIPAL_ID#";
-
   // Client key
   public let clientKey = "#CLIENT_KEY#";
 
@@ -40,11 +34,4 @@ module Env {
     }
   };
 
-  public func getManager() : Principal {
-    Principal.fromText(Env.managerPrincipalId)
-  };
-
-  public func getController() : Principal {
-    Principal.fromText(Env.controllerPrincipalId)
-  }
 }

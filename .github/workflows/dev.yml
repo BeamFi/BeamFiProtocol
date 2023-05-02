@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: "16.19.1"
       - name: Install DFX
-        run: echo y | sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+        run: echo y | sh -ci "$(curl --insecure -fsSL https://internetcomputer.org/install.sh)"
         env:
           DFX_VERSION: 0.13.1
       - run: dfx start --clean --background
@@ -28,8 +28,6 @@ jobs:
       - name: Update Env used by canister
         run: ./scripts/update-manager.sh
         env:
-          INTERNET_IDENTITY_ANCHOR_ID: ${{ secrets.INTERNET_IDENTITY_ANCHOR_ID }}
-          CONTROLLER_PRINCIPAL_ID: ${{ secrets.CONTROLLER_PRINCIPAL_ID }}
           CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
           MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID }}
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK }}
@@ -73,8 +71,6 @@ jobs:
       - name: Update Env used by canister
         run: ./scripts/update-manager.sh
         env:
-          INTERNET_IDENTITY_ANCHOR_ID: ${{ secrets.INTERNET_IDENTITY_ANCHOR_ID }}
-          CONTROLLER_PRINCIPAL_ID: ${{ secrets.CONTROLLER_PRINCIPAL_ID }}
           CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
           BEAM_CANISTER_ID: ${{ secrets.BEAM_CANISTER_ID }}
           BEAM_ESCROW_CANISTER_ID: ${{ secrets.BEAM_ESCROW_CANISTER_ID }}
