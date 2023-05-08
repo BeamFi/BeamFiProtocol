@@ -2,9 +2,7 @@
 
 BeamFi Protocol is a Micro Payments Solution for transferring a continuous stream of money or values represented by the tokens in real-time without intermediaries.
 
-![Autonomous Streams](/guide/images/autonomous.png)
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/85TWP4QHHBg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![Watch BeamFi Meeting App Demo with Zoom](/guide/images/meeting-app.png)](https://youtu.be/85TWP4QHHBg)
 
 ## What problems does it solve?
 
@@ -14,7 +12,9 @@ BeamFi Protocol is a Micro Payments Solution for transferring a continuous strea
 - Bring fairness, as with lump-sum payment, one party always has an advantage.
 - Users will have full ownership of their payment data and how it can be used to provide analytics services or insights to them, by allowing 3rd party companies to read their data with their consent
 
-## Getting Start Guide
+![Autonomous Streams](/guide/images/autonomous.png)
+
+## Getting Started Guide
 
 See [BeamFi Developer Documentation](https://developer.beamfi.app) for getting started, architecture, API, integration with Web frontend, deployment and sample apps.  
 See [BeamFi Pitch Deck](https://pitch.com/public/24972b6a-11d1-4690-8215-a2b44767d68a) for its vision.  
