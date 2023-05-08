@@ -16,6 +16,9 @@
     "topup": "node ./scripts/topup-canisters.js"
   },
   "devDependencies": {
-    "eslint": "7"
+    "@commitlint/cli": "^17.6.3",
+    "@commitlint/config-conventional": "^17.6.3",
+    "eslint": "7",
+    "husky": "^8.0.3"
   }
 }
