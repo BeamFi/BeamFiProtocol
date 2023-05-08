@@ -4,6 +4,8 @@ BeamFi Protocol is a Micro Payments Solution for transferring a continuous strea
 
 [![Watch BeamFi Meeting App Demo with Zoom](/guide/images/meeting-app.png)](https://youtu.be/85TWP4QHHBg)
 
+[**Watch BeamFi Meeting App Demo**](https://youtu.be/85TWP4QHHBg)
+
 ## What problems does it solve?
 
 - Remove the intermediaries and their fees, putting the power back to the users.
@@ -50,17 +52,21 @@ BeamFi Zoom Integration Architecture
 - [x] Frontend - NFID integration with BeamFi
 - [x] Test - Automated Smart Contract API tests
 - [x] Doc - Developer Documentation and API Documentation
-- [ ] Backend - Bitcoin ckBTC supoort
+- [ ] Backend - Bitcoin ckBTC support
 - [ ] Frontend - Native Bitcoin support
 - [ ] Frontend - Client SDK (TypeScript)
-- [ ] Frontend - Connect to different BeamFi Vaults, and switch among them
+- [ ] Frontend - Connect to different BeamFi Vaults, and switch between them
 - [ ] Backend - BeamFi Protocol 3.0 (Rate-based Continuous Streaming Beam)
 
 ## License
 
-See the [License](License) file for license rights and limitations (MIT). See CONTRIBUTE.md for details about how to contribute to this project.
+See the [License](License) file for license rights and limitations (MIT).
 
-## Acknowledgments
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details about how to contribute to this project.
+
+## Authors
 
 Code & Architecture: Henry Chan, [henry@beamfi.app](mailto:henry@beamfi.app), Twitter: [@kinwo](https://twitter.com/kinwo)  
 Product & Vision: Sam McCallum, [sam@beamfi.app](mailto:sam@beamfi.app)
