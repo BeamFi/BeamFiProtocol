@@ -26,7 +26,7 @@ jobs:
       - name: Update dfx.cfg for test
         run: npm run test:dfx:updateconfig
       - name: Update Env used by canister
-        run: ./scripts/update-manager.sh
+        run: ./scripts/update-env.sh
         env:
           CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
           MONITORAGENT_CANISTER_ID: ${{ secrets.MONITORAGENT_CANISTER_ID }}
@@ -59,7 +59,6 @@ jobs:
         run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
         env:
           DFX_VERSION: 0.13.1
-      - run: dfx start --clean --background
       - name: Add DFX identity and wallets
         run: ./scripts/add-ic-identity.sh
         env:
@@ -69,7 +68,7 @@ jobs:
         run: curl -L -o /usr/local/bin/vessel https://github.com/dfinity/vessel/releases/download/v0.6.3/vessel-linux64
       - run: chmod +x /usr/local/bin/vessel
       - name: Update Env used by canister
-        run: ./scripts/update-manager.sh
+        run: ./scripts/update-env.sh
         env:
           CLIENT_KEY: ${{ secrets.CLIENT_KEY }}
           BEAM_CANISTER_ID: ${{ secrets.BEAM_CANISTER_ID }}
@@ -78,8 +77,6 @@ jobs:
           BITCOIN_NETWORK: ${{ secrets.BITCOIN_NETWORK }}
           ZOOM_SECRET_TOKEN: ${{ secrets.ZOOM_SECRET_TOKEN }}
       - name: Build and deploy backend canisters to Internet Computer network
-        run: ./scripts/upgrade-canisters.sh
-      - name: Stop DFX server
-        run: dfx stop
+        run: ./scripts/deploy-canisters.sh
       - name: Show success mesg
         run: echo Congratulations! The build and deployment are successful.
